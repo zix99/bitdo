@@ -6,7 +6,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "lint": "eslint ."
   },
   "bin": {
     "bitdo": "./index.js"
@@ -23,6 +24,9 @@
     "rc": "^1.2.1"
   },
   "devDependencies": {
+    "eslint": "^4.5.0",
+    "eslint-config-airbnb-base": "^11.3.2",
+    "eslint-plugin-import": "^2.7.0",
     "nodemon": "^1.11.0"
   }
 }
