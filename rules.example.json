@@ -1,5 +1,6 @@
 {
 	"exchanges" : ["gdax"],
+	"plugins" : ["historicals"],
 	"period": "10m",
 	"rules": [
 		{
