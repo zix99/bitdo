@@ -48,7 +48,37 @@ module.exports = {
 	getOrders() {
 		return executeRequest('GET', '/orders?status=all');
 	},
-};
 
-module.exports.getOrders()
-	.tap(console.log);
+	getHoldings() {
+		return executeRequest('GET', '/accounts')
+		.map(account => {
+			return {
+				id: account.id,
+				currency: `${account.currency}`,
+				balance: parseFloat(account.balance),
+				available: parseFloat(account.available),
+				hold: parseFloat(account.hold),
+			};
+		});
+	},
+
+	getProducts() {
+		return executeRequest('GET', '/products')
+			.map(product => {
+				return {
+					currency: product.base_currency,
+					relation: product.quote_currency,
+				};
+			});
+	},
+
+	getTicker(currency, relation) {
+		return executeRequest('GET', `/products/${currency}-${relation}/ticker`)
+			.then(data => {
+				return {
+					price: data.price,
+					volume: data.volume,
+				};
+			});
+	}
+};
