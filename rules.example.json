@@ -1,0 +1,11 @@
+{
+	"exchanges" : ["gdax"],
+	"period": "10m",
+	"rules": [
+		{
+			"action" : "buy-limit",
+			"mode" : "remove",
+			"price" : "100"
+		}
+	]
+}

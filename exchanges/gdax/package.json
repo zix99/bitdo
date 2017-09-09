@@ -9,7 +9,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.16.2",
     "bluebird": "^3.5.0",
-    "gdax": "^0.4.2"
+    "rc": "^1.2.1"
   }
 }
