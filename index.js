@@ -32,11 +32,23 @@ _.each(rules.exchanges, exchangeName => {
 
 const holdings = {};
 
+function getAllMarkets() {
+	return Promise.map(exchanges, exchange => {
+		return exchange.getMarkets();
+	}).then(_.flatten);
+}
+
+function updateTicker() {
+	return getAllMarkets()
+		.map(market => {
+			return market.exchange.getTicker(market.currency, market.relation);
+		});
+}
+
 function updateHoldings() {
 	return Promise.map(exchanges, exchange => {
 		return exchange.getHoldings()
 			.then(holdings => {
-				console.log(holdings);
 				_.each(holdings, holding => plugins.event('onHoldingUpdate', holding));
 				return holdings;
 			});
@@ -46,6 +58,7 @@ function updateHoldings() {
 function poll() {
 	log.info('Polling...');
 	Promise.all([
+		updateTicker().tap(console.dir),
 		updateHoldings(),
 	]).then(() => {
 		//ui.update();

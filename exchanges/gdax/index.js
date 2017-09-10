@@ -62,7 +62,7 @@ module.exports = {
 		});
 	},
 
-	getProducts() {
+	getMarkets() {
 		return executeRequest('GET', '/products')
 			.map(product => {
 				return {
@@ -76,8 +76,8 @@ module.exports = {
 		return executeRequest('GET', `/products/${currency}-${relation}/ticker`)
 			.then(data => {
 				return {
-					price: data.price,
-					volume: data.volume,
+					price: parseFloat(data.price),
+					volume: parseFloat(data.volume),
 				};
 			});
 	}

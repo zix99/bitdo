@@ -1,8 +1,9 @@
 
 
-const Plugin = function(impl) {
+const Plugin = function(name, impl) {
 	if (!impl)
 		throw new Error('Must provide impl to Plugin');
+	this.name = name;
 	this._impl = impl;
 };
 
@@ -13,6 +14,6 @@ Plugin.prototype.onHoldingUpdate = function (holding) {
 module.exports = {
 	createPlugin(name) {
 		// Simple for now, will wrap in the future.
-		return new Plugin(require(`./${name}`));
+		return new Plugin(name, require(`./${name}`));
 	}
 };
