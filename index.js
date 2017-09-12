@@ -45,6 +45,20 @@ function updateTicker() {
 		});
 }
 
+function buildExchangeRateTable() {
+	const TARGETS = ['USD', 'BTC'];
+	return updateTicker()
+		.then(tickers => {
+			let data = {};
+			_.each(tickers, ticker => {
+				if (_.includes(TARGETS, ticker.relation)) {
+					data[`${ticker.currency}-${ticker.relation}`] = ticker.price;
+				}
+			});
+			return data;
+		});
+}
+
 function updateHoldings() {
 	return Promise.map(exchanges, exchange => {
 		return exchange.getHoldings()
@@ -58,7 +72,7 @@ function updateHoldings() {
 function poll() {
 	log.info('Polling...');
 	Promise.all([
-		updateTicker().tap(console.dir),
+		buildExchangeRateTable().tap(console.dir),
 		updateHoldings(),
 	]).then(() => {
 		//ui.update();

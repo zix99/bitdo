@@ -8,7 +8,7 @@ module.exports = {
 	getMarkets() {
 		return Promise.resolve([
 			{
-				currenct: 'MCK',
+				currency: 'MCK',
 				relation: 'USD',
 			}
 		]);
