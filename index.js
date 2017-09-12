@@ -46,7 +46,7 @@ function updateTicker() {
 }
 
 function buildExchangeRateTable() {
-	const TARGETS = ['USD', 'BTC'];
+	const TARGETS = rules.primary_currencies;
 	return updateTicker()
 		.then(tickers => {
 			let data = {};
@@ -74,6 +74,7 @@ function getRateBetweenCurrencies(rateTable, from, to) {
 		return direct;
 
 	// Maybe we need to go indirectly... try via BTC
+	// TODO: Better implementation of conversions
 	const toBtc = _.get(rateTable, `${from}-BTC`);
 	const toTarget = _.get(rateTable, `BTC-${to}`);
 	if (toBtc !== null && toTarget !== null)
@@ -88,12 +89,11 @@ function updateHoldings() {
 		buildExchangeRateTable(),
 	]).spread((holdings, rates) => {
 		_.each(holdings, holding => {
-			const toBtc = getRateBetweenCurrencies(rates, holding.currency, 'BTC'); //TODO: Configure primary currencies
-			const toUsd = getRateBetweenCurrencies(rates, holding.currency, 'USD');
-
-			holding.balance_btc = holding.balance * toBtc;
-			holding.balance_usd = holding.balance * toUsd;
-
+			holding.conversions = {};
+			_.each(rules.primary_currencies, pc => {
+				const toPcRate = getRateBetweenCurrencies(rates, holding.currency, pc);
+				holding.conversions[pc] = holding.balance * toPcRate;
+			})
 			console.dir(holding);
 		});
 	});
