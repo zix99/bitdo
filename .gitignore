@@ -1,6 +1,7 @@
 #custom
 rules.json
 .gdaxrc
+.bittrexrc
 
 # Logs
 logs

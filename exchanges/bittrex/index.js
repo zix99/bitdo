@@ -1,4 +1,5 @@
 const axios = require('axios');
+const uuid = require('uuid/v4');
 const Promise = require('bluebird');
 const config = require('./config');
 
