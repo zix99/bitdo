@@ -70,14 +70,14 @@ function getRateBetweenCurrencies(rateTable, from, to) {
 		return 1.0;
 
 	const direct = _.get(rateTable, `${from}-${to}`);
-	if (direct !== null)
+	if (direct !== undefined)
 		return direct;
 
 	// Maybe we need to go indirectly... try via BTC
 	// TODO: Better implementation of conversions
 	const toBtc = _.get(rateTable, `${from}-BTC`);
 	const toTarget = _.get(rateTable, `BTC-${to}`);
-	if (toBtc !== null && toTarget !== null)
+	if (toBtc !== undefined && toTarget !== undefined)
 		return toBtc * toTarget;
 
 	return 0.0;
