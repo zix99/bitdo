@@ -1,5 +1,5 @@
 {
-	"exchanges" : ["gdax", "mock"],
+	"exchanges" : ["gdax", "mock", "bittrex"],
 	"plugins" : ["historicals"],
 	"period": "10m",
 	"rules": [
