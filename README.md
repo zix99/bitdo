@@ -22,8 +22,6 @@ npm run dev
 
 # License
 
-# License
-
 Copyright (c) 2017 Christopher LaPointe
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
