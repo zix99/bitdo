@@ -1,8 +1,13 @@
 const _ = require('lodash');
+const memoize = require('memoizee');
 
 function Exchange(name, impl) {
 	this.name = name;
 	this._impl = impl;
+
+	this.getMarkets = memoize(this.__getMarkets, {
+		maxAge: 1000 * 60 * 60 * 6 // 6 hours
+	});
 };
 
 Exchange.prototype.getTicker = function (currency, relation) {
@@ -30,7 +35,7 @@ Exchange.prototype.getHoldings = function () {
 		.map(holding => _.assign({exchange: this}, holding));
 }
 
-Exchange.prototype.getMarkets = function() {
+Exchange.prototype.__getMarkets = function() {
 	/*[{
 		currency: product.base_currency,
 		relation: product.quote_currency,
