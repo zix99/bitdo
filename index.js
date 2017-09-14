@@ -1,12 +1,12 @@
 #!/usr/bin/env node
-const log = require('./lib/logger');
+const log = require('./log');
 const Promise = require('bluebird');
 const fs = require('fs');
 const _ = require('lodash');
 const Exchanges = require('./exchanges');
 const Plugins = require('./plugins');
 const PluginSet = require('./lib/pluginset');
-//const ui = require('./ui');
+const ui = require('./ui');
 const duration = require('./lib/duration');
 
 // Load the rules
@@ -100,6 +100,7 @@ function updateHoldings() {
 				holding.conversions[pc] = holding.balance * toPcRate;
 			})
 			console.dir(holding);
+			ui.updateHolding(holding);
 		});
 	});
 }
@@ -109,7 +110,7 @@ function poll() {
 	Promise.all([
 		updateHoldings(),
 	]).then(() => {
-		//ui.update();
+		ui.render();
 	});
 }
 

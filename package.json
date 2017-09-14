@@ -21,8 +21,10 @@
   "license": "MIT",
   "dependencies": {
     "blessed": "^0.1.81",
+    "blessed-contrib": "^4.8.5",
     "bluebird": "^3.5.0",
     "moment": "^2.18.1",
+    "numeral": "^2.0.6",
     "rc": "^1.2.1",
     "winston": "^2.3.1"
   },
@@ -30,6 +32,6 @@
     "eslint": "^4.5.0",
     "eslint-config-airbnb-base": "^11.3.2",
     "eslint-plugin-import": "^2.7.0",
-    "nodemon": "^1.11.0"
+    "nodemon": "^1.12.0"
   }
 }
