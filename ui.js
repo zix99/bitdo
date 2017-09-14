@@ -5,6 +5,8 @@ const numeral = require('numeral');
 
 const NUMF = "0,0.0000";
 function formatNum(n) {
+	if (Math.abs(n) < 0.0001)
+		return '0';
 	return numeral(n || 0).format(NUMF);
 }
 
