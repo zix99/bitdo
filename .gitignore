@@ -2,6 +2,7 @@
 rules.json
 .gdaxrc
 .bittrexrc
+db.sqlite
 
 # Logs
 logs

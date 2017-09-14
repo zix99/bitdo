@@ -8,6 +8,7 @@ const Plugins = require('./plugins');
 const PluginSet = require('./lib/pluginset');
 const ui = require('./ui');
 const duration = require('./lib/duration');
+const db = require('./db');
 
 // Load the rules
 let rules = JSON.parse(fs.readFileSync('rules.json', {encoding: 'utf8'}));
@@ -101,6 +102,13 @@ function updateHoldings() {
 			})
 			console.dir(holding);
 			ui.updateHolding(holding);
+			db.Holdings.create({
+				exchange: holding.exchange.name,
+				currency: holding.currency,
+				amount: holding.balance,
+				amountUsd: holding.conversions.USD,
+				amountBtc: holding.conversions.BTC,
+			})
 		});
 	});
 }
@@ -120,4 +128,4 @@ function main() {
 	poll();
 	setInterval(poll, period.asMilliseconds());
 }
-main();
+db.db.sync().then(() => main());
