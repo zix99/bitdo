@@ -1,5 +1,5 @@
 {
-  "name": "historicals",
+  "name": "bitdo-plugin-web",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -10,8 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.15.4",
-    "rc": "^1.2.1",
-    "sequelize": "^4.8.2",
-    "sqlite3": "^3.1.10"
+    "hbs": "^4.0.1",
+    "rc": "^1.2.1"
   }
 }

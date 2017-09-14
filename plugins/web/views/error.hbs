@@ -1,0 +1,13 @@
+<h1>{{message}}</h1>
+{{#if error}}
+	<h2>{{error.status}}</h2>
+	{{#unless is_production}}
+		<pre>{{error.stack}}</pre>
+	{{/unless}}
+{{/if}}
+{{#if description}}
+	<p>{{description}}</p>
+{{/if}}
+<p>
+	<a href="/">Go Back to Homepage</a>
+</p>

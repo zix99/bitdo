@@ -12,8 +12,8 @@ Plugin.prototype.onHoldingUpdate = function (holding) {
 };
 
 module.exports = {
-	createPlugin(name) {
+	createPlugin(name, context) {
 		// Simple for now, will wrap in the future.
-		return new Plugin(name, require(`./${name}`));
+		return new Plugin(name, require(`./${name}`)(context));
 	}
 };

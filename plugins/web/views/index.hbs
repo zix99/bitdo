@@ -1,0 +1,37 @@
+<canvas id="holdings" width="400" height="500"></canvas>
+
+<script>
+
+var ctx = document.getElementById("holdings");
+var chart = new Chart(ctx, {
+	type: 'line',
+	data: {
+		labels: [
+
+		],
+		datasets: [
+			{{#holdings}}
+			{
+				label: "{{market}}",
+				data: [],
+			},
+			{{/holdings}}
+		]
+	},
+	options: {
+		scales: {
+			yAxes: [{
+				stacked: true,
+			}],
+		},
+	},
+});
+
+</script>
+
+{{#holdings}}
+MKT: {{market}}
+{{#points}}
+BEGIN: {{amount}} {{currency}} {{exchange}}
+{{/points}}
+{{/holdings}}

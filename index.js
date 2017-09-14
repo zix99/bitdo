@@ -10,31 +10,34 @@ const ui = require('./ui');
 const duration = require('./lib/duration');
 const db = require('./db');
 
+const context = {
+	rules: {},
+	exchanges: [],
+	db,
+};
+
 // Load the rules
-let rules = JSON.parse(fs.readFileSync('rules.json', {encoding: 'utf8'}));
+context.rules = JSON.parse(fs.readFileSync('rules.json', {encoding: 'utf8'}));
 
 // Initialize plugins
 const plugins = new PluginSet();
-_.each(rules.plugins, pluginName => {
+_.each(context.rules.plugins, pluginName => {
 	log.info(`Loading plugin '${pluginName}'...`);
-	plugins.push(Plugins.createPlugin(pluginName));
+	plugins.push(Plugins.createPlugin(pluginName, context));
 });
 
 // Initialize exchanges
-const exchanges = [];
-_.each(rules.exchanges, exchangeName => {
+_.each(context.rules.exchanges, exchangeName => {
 	log.info(`Loading exchange '${exchangeName}'...`);
 	const exchange = Exchanges.createExchange(exchangeName);
-	exchanges.push(exchange);
+	context.exchanges.push(exchange);
 	plugins.event('onExchangeAdd', exchange);
 });
 
 // START
 
-const holdings = {};
-
 function getAllMarkets() {
-	return Promise.map(exchanges, exchange => {
+	return Promise.map(context.exchanges, exchange => {
 		return exchange.getMarkets();
 	}).then(_.flatten);
 }
@@ -47,7 +50,7 @@ function updateTicker() {
 }
 
 function buildExchangeRateTable() {
-	const TARGETS = rules.primary_currencies;
+	const TARGETS = context.rules.primary_currencies;
 	return updateTicker()
 		.then(tickers => {
 			let data = {};
@@ -61,7 +64,7 @@ function buildExchangeRateTable() {
 }
 
 function getHoldings() {
-	return Promise.map(exchanges, exchange => {
+	return Promise.map(context.exchanges, exchange => {
 		return exchange.getHoldings();
 	}).then(holdings => _.flatten(holdings));
 }
@@ -96,7 +99,7 @@ function updateHoldings() {
 	]).spread((holdings, rates) => {
 		_.each(holdings, holding => {
 			holding.conversions = {};
-			_.each(rules.primary_currencies, pc => {
+			_.each(context.rules.primary_currencies, pc => {
 				const toPcRate = getRateBetweenCurrencies(rates, holding.currency, pc);
 				holding.conversions[pc] = holding.balance * toPcRate;
 			})
@@ -123,7 +126,7 @@ function poll() {
 }
 
 function main() {
-	const period = duration.parse(rules.period);
+	const period = duration.parse(context.rules.period);
 	log.info(`Polling every ${period.asMinutes()} minutes...`);
 	poll();
 	setInterval(poll, period.asMilliseconds());
