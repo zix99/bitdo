@@ -44,7 +44,7 @@ Exchange.prototype.getHoldings = function () {
 Exchange.prototype.getOrders = function() {
 	/*
 	[{
-		status: 'O',
+		status: 'O', // O=open, F=filled, X=canceled/rejected, ? = unknown/other
 		product: order.product,
 		price: order.price,
 		size: order.size,

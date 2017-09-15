@@ -88,10 +88,10 @@ screen.key(['C-c'], function(ch, key) {
 });
 
 screen.key(['j'], function() {
-	log.scroll(-1);
+	log.scroll(-10);
 });
 screen.key(['k'], function() {
-	log.scroll(1);
+	log.scroll(10);
 });
 
 screen.render();
@@ -141,20 +141,35 @@ module.exports = {
 	},
 
 	updateOrders(orders) {
-		console.dir(orders);
-		const rows = _.map(_.orderBy(orders, x => x.date, 'desc'), order => {
-			return [
-				order.status,
-				moment(order.date).format('M/D H:mm'),
-				order.exchange.name,
-				order.product,
-				order.side,
-				order.type,
-				formatNum(order.size),
-				formatNum(order.price),
-				formatNum(order.fee)
-			];
-		});
+		const rows = _.flatten([
+			_.map(_.orderBy(_.filter(orders, x => x.status === 'O'), x => x.date, 'desc'), order => {
+				return [
+					order.status,
+					moment(order.date).format('M/D H:mm'),
+					order.exchange.name,
+					order.product,
+					order.side,
+					order.type,
+					formatNum(order.size),
+					formatNum(order.price),
+					'N/A',
+				]
+			}),
+			[[]],
+			_.map(_.orderBy(_.filter(orders, x => x.status !== 'O'), x => x.date, 'desc'), order => {
+				return [
+					order.status,
+					moment(order.date).format('M/D H:mm'),
+					order.exchange.name,
+					order.product,
+					order.side,
+					order.type,
+					formatNum(order.size),
+					formatNum(order.price),
+					formatNum(order.fee)
+				]
+			}),
+		]);
 		rows.unshift(['', 'Created', 'Exchange', 'Product', 'Side', 'Type', 'Size', 'Price', 'Fee']);
 		orderTable.setData(rows);
 		screen.render();
