@@ -42,6 +42,10 @@ module.exports = {
 			});
 	},
 
+	getOrders() {
+		return Promise.resolve([]); //TODO
+	},
+
 	getMarkets() {
 		return Promise.resolve(axios.get(`${config.host}/api/v1.1/public/getmarkets`))
 			.then(resp => resp.data.result)

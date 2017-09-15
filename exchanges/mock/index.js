@@ -5,6 +5,10 @@ module.exports = {
 		return Promise.resolve([]);
 	},
 
+	getOrders() {
+		return Promise.resolve([]);
+	},
+
 	getMarkets() {
 		return Promise.resolve([
 			{

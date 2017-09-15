@@ -15,7 +15,7 @@ const screen = blessed.Screen({
 	smartCSR: true
 });
 
-const holdings = contrib.table({
+const holdingTable = contrib.table({
 	keys: true,
 	width: '60%',
 	height: '50%',
@@ -25,38 +25,49 @@ const holdings = contrib.table({
 	columnSpacing: 4,
 	border: {
 		type: 'line',
-	}
+	},
 });
-screen.append(holdings);
-holdings.focus();
+screen.append(holdingTable);
+holdingTable.focus();
 
-const holdingData = {};
-function updateHoldingsTable() {
-	let sums = {BTC: 0, USD: 0};
-	const data = _.map(_.orderBy(holdingData, x => x.conversions.USD, 'desc'), (v, key) => {
-		sums.BTC += v.conversions.BTC;
-		sums.USD += v.conversions.USD;
-		return [
-			moment(v.updatedAt).format('Do hA'),
-			v.exchange.name, v.currency,
-			formatNum(v.ticker.USD),
-			formatNum(v.balance), formatNum(v.conversions.BTC), formatNum(v.conversions.USD)
-		];
-	})
-	data.unshift([]);
-	data.unshift(['', 'Total', '', '', '', formatNum(sums.BTC), formatNum(sums.USD)]);
+const ruleTable = blessed.ListTable({
+	width: '40%',
+	height: '50%',
+	left: '60%',
+	top: '0',
+	border: {
+		type: 'line',
+	},
+	style : {
+		header: {
+			bold: true,
+			bg: 'green',
+		}
+	},
+});
+screen.append(ruleTable);
 
-	holdings.setData({
-		headers: ['Updated', 'Exch', 'Sym', 'Last', 'Owned', 'BTC', 'USD'],
-		data,
-	});
-}
-updateHoldingsTable();
+const orderTable = blessed.ListTable({
+	width: '60%',
+	height: '50%',
+	top: '50%',
+	border: {
+		type: 'line',
+	},
+	style : {
+		header: {
+			bold: true,
+			bg: 'blue',
+		}
+	},
+});
+screen.append(orderTable);
 
 const log = blessed.Log({
 	width: '40%',
-	height: '100%',
+	height: '50%',
 	left: '60%',
+	top: '50%',
 	border: {
 		type: 'line',
 	},
@@ -85,6 +96,34 @@ screen.key(['k'], function() {
 
 screen.render();
 
+
+
+const holdingData = {};
+function updateHoldingsTable() {
+	let sums = {BTC: 0, USD: 0};
+	const data = _.map(_.orderBy(holdingData, x => x.conversions.USD, 'desc'), (v, key) => {
+		sums.BTC += v.conversions.BTC;
+		sums.USD += v.conversions.USD;
+		return [
+			moment(v.updatedAt).format('Do hA'),
+			v.exchange.name,
+			v.currency,
+			formatNum(v.ticker.USD),
+			formatNum(v.balance),
+			formatNum(v.conversions.BTC),
+			formatNum(v.conversions.USD)
+		];
+	})
+	data.unshift([]);
+	data.unshift(['', 'Total', '', '', '', formatNum(sums.BTC), formatNum(sums.USD)]);
+
+	holdingTable.setData({
+		headers: ['Updated', 'Exch', 'Sym', 'Last', 'Owned', 'BTC', 'USD'],
+		data,
+	});
+}
+updateHoldingsTable();
+
 module.exports = {
 	log(s) {
 		log.log(s);
@@ -100,4 +139,24 @@ module.exports = {
 		updateHoldingsTable();
 		screen.render();
 	},
+
+	updateOrders(orders) {
+		console.dir(orders);
+		const rows = _.map(_.orderBy(orders, x => x.date, 'desc'), order => {
+			return [
+				order.status,
+				moment(order.date).format('M/D H:mm'),
+				order.exchange.name,
+				order.product,
+				order.side,
+				order.type,
+				formatNum(order.size),
+				formatNum(order.price),
+				formatNum(order.fee)
+			];
+		});
+		rows.unshift(['', 'Created', 'Exchange', 'Product', 'Side', 'Type', 'Size', 'Price', 'Fee']);
+		orderTable.setData(rows);
+		screen.render();
+	}
 };

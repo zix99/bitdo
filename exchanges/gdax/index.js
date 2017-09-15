@@ -46,7 +46,34 @@ function executeRequest(method, uri, body) {
 
 module.exports = {
 	getOrders() {
-		return executeRequest('GET', '/orders?status=all');
+		return Promise.all([
+			executeRequest('GET', '/orders?status=open')
+				.map(order => {
+					return {
+						status: 'O',
+						product: order.product_id,
+						price: order.price,
+						size: order.size,
+						date: order.created_at,
+						type: order.type,
+						side: order.side,
+						fee: order.fill_fees,
+					}
+				}),
+			executeRequest('GET', '/fills') //TODO: Need to get by product, otherwise will miss some
+				.map(order => {
+					return {
+						status: 'F',
+						type: 'Filled',
+						product: order.product_id,
+						price: order.price,
+						size: order.size,
+						date: order.created_at,
+						side: order.side,
+						fee: order.fee,
+					};
+				}),
+		]).then(_.flatten);
 	},
 
 	getHoldings() {
