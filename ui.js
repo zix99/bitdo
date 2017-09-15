@@ -3,6 +3,7 @@ const contrib = require('blessed-contrib');
 const _ = require('lodash');
 const numeral = require('numeral');
 const moment = require('moment');
+const config = require('./config');
 
 const NUMF = "0,0.0000";
 function formatNum(n) {
@@ -102,8 +103,8 @@ screen.render();
 
 const holdingData = {};
 function updateHoldingsTable() {
-	let sums = {BTC: 0, USD: 0};
-	const data = _.map(_.orderBy(holdingData, x => x.conversions.USD, 'desc'), (v, key) => {
+	let sums = _. {BTC: 0, USD: 0};
+	const data = _.map(_.orderBy(holdingData, x => x.conversions[config.primary], 'desc'), (v, key) => {
 		sums.BTC += v.conversions.BTC;
 		sums.USD += v.conversions.USD;
 		return [

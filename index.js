@@ -131,7 +131,7 @@ function updateHoldings() {
 				exchange: holding.exchange.name,
 				currency: holding.currency,
 				amount: holding.balance,
-				amountUsd: holding.conversions.USD,
+				amountUsd: holding.conversions.USD,	//TODO: Ideally, this won't be hardcoded
 				amountBtc: holding.conversions.BTC,
 			})
 		});

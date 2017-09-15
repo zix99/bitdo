@@ -1,4 +1,4 @@
-module.exports = require('yargs')
+let config = require('yargs')
 	.usage('Usage: $0 [options]')
 	.help('h')
 	.alias('h', 'help')
@@ -12,3 +12,7 @@ module.exports = require('yargs')
 	.alias('v', 'verbose')
 	.describe('v', 'Display debug text in log')
 	.argv;
+
+config.primary = config.currencies[0] || 'USD';
+
+module.exports = config;
