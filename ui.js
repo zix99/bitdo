@@ -2,6 +2,7 @@ const blessed = require('blessed');
 const contrib = require('blessed-contrib');
 const _ = require('lodash');
 const numeral = require('numeral');
+const moment = require('moment');
 
 const NUMF = "0,0.0000";
 function formatNum(n) {
@@ -20,7 +21,7 @@ const holdings = contrib.table({
 	height: '50%',
 	interactive: true,
 	label: 'Holdings',
-	columnWidth: [8,8,4, 12, 12, 12],
+	columnWidth: [10,8,4, 12, 12, 12, 12],
 	columnSpacing: 4,
 	border: {
 		type: 'line',
@@ -36,15 +37,17 @@ function updateHoldingsTable() {
 		sums.BTC += v.conversions.BTC;
 		sums.USD += v.conversions.USD;
 		return [
-			'', v.exchange.name, v.currency,
+			moment(v.updatedAt).format('Do hA'),
+			v.exchange.name, v.currency,
+			formatNum(v.ticker.USD),
 			formatNum(v.balance), formatNum(v.conversions.BTC), formatNum(v.conversions.USD)
 		];
 	})
 	data.unshift([]);
-	data.unshift(['', 'Total', '', '', formatNum(sums.BTC), formatNum(sums.USD)]);
+	data.unshift(['', 'Total', '', '', '', formatNum(sums.BTC), formatNum(sums.USD)]);
 
 	holdings.setData({
-		headers: ['Date', 'Exch', 'Sym', 'Amt', 'BTC', 'USD'],
+		headers: ['Updated', 'Exch', 'Sym', 'Last', 'Owned', 'BTC', 'USD'],
 		data,
 	});
 }

@@ -117,9 +117,12 @@ function updateHoldings() {
 			return o;
 		}, {});
 		_.each(holdings, holding => {
+			holding.updatedAt = new Date();
 			holding.conversions = {};
+			holding.ticker = {};
 			_.each(config.currencies, pc => {
 				const toPcRate = getRateBetweenCurrencies(rates, holding.currency, pc);
+				holding.ticker[pc] = toPcRate;
 				sums[pc] += holding.conversions[pc] = holding.balance * toPcRate;
 			})
 			console.dir(holding);
