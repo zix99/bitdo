@@ -76,7 +76,7 @@ module.exports = {
 					return _.assign({
 						status: 'O',
 						product: order.Exchange,
-						price: order.Price,
+						price: order.Limit,
 						size: order.Quantity,
 						date: order.Opened,
 						fee: 0,

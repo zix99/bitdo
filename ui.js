@@ -6,8 +6,10 @@ const moment = require('moment');
 
 const NUMF = "0,0.0000";
 function formatNum(n) {
-	if (Math.abs(n) < 0.0001)
-		return '0';
+	if (Math.abs(n) < 0.000000001)
+		return '0.0';
+	if (Math.abs(n) < 0.00001)
+		return '~0';
 	return numeral(n || 0).format(NUMF);
 }
 
