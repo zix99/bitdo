@@ -3,11 +3,9 @@ module.exports = require('yargs')
 	.help('h')
 	.alias('h', 'help')
 	.array('currencies')
-	.help('currencies', 'A set of primary currencies to convert to')
+	.describe('currencies', 'A set of primary currencies to convert to')
 	.default('currencies', ['BTC', 'USD'])
 	.describe('db', 'Filename of database to store history')
 	.default('db', 'db.sqlite')
 	.string('db')
 	.argv;
-
-process.exit(1);
