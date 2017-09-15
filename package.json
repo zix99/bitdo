@@ -26,10 +26,10 @@
     "memoizee": "^0.4.11",
     "moment": "^2.18.1",
     "numeral": "^2.0.6",
-    "rc": "^1.2.1",
     "sequelize": "^4.8.3",
     "sqlite3": "^3.1.11",
-    "winston": "^2.3.1"
+    "winston": "^2.3.1",
+    "yargs": "^8.0.2"
   },
   "devDependencies": {
     "eslint": "^4.5.0",

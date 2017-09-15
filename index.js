@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const log = require('./log');
+const config = require('./config');
 const Promise = require('bluebird');
 const fs = require('fs');
 const _ = require('lodash');
@@ -9,6 +9,7 @@ const PluginSet = require('./lib/pluginset');
 const ui = require('./ui');
 const duration = require('./lib/duration');
 const db = require('./db');
+const log = require('./log');
 
 const context = {
 	rules: {},

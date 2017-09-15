@@ -69,7 +69,7 @@ const log = blessed.Log({
 screen.append(log);
 log.focus();
 
-screen.key(['escape', 'q', 'C-c'], function(ch, key) {
+screen.key(['C-c'], function(ch, key) {
   return process.exit(0);
 });
 
