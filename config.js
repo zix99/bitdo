@@ -8,4 +8,7 @@ module.exports = require('yargs')
 	.describe('db', 'Filename of database to store history')
 	.default('db', 'db.sqlite')
 	.string('db')
+	.boolean('v')
+	.alias('v', 'verbose')
+	.describe('v', 'Display debug text in log')
 	.argv;
