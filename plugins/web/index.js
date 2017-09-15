@@ -2,21 +2,10 @@ const config = require('./config');
 const path = require('path');
 const express = require('express');
 const hbs = require('hbs');
+const moment = require('moment');
 const _ = require('lodash');
 
 hbs.registerPartials(`${__dirname}/views/partials`);
-
-function translateHoldingsToChart(holdings) {
-	const markets = _.uniq(_.map(holdings, h => `${h.exchange}:${h.currency}`));
-
-	return _.map(markets, market => {
-		console.log(market);
-		const points = _.map(_.filter(holdings, x => `${x.exchange}:${x.currency}` === market), point => {
-			return {date: point.createDate, amount: point.amount};
-		});
-		return {points, market};
-	});
-}
 
 module.exports = function(context) {
 	const app = express();
@@ -25,10 +14,17 @@ module.exports = function(context) {
 	app.set('view engine', 'hbs');
 
 	app.get('/', (req, res) => {
-		context.db.Holdings.findAll()
-			.then(holdings => {
-				res.render('index', {holdings: translateHoldingsToChart(holdings)});
-			});
+		context.db.Historicals.findAll({
+			where: {
+				currency: 'USD',
+				createdAt: {$gt: moment().subtract(30, 'days').toDate()},
+			},
+			order: [
+				['createdAt', 'ASC'],
+			]
+		}).then(history => {
+			res.render('index', {history});
+		});
 	});
 
 	app.use((req, res, next) => {

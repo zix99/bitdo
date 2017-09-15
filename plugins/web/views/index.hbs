@@ -1,4 +1,4 @@
-<canvas id="holdings" width="400" height="500"></canvas>
+<canvas id="holdings" width="200" height="100"></canvas>
 
 <script>
 
@@ -7,31 +7,37 @@ var chart = new Chart(ctx, {
 	type: 'line',
 	data: {
 		labels: [
-
+			{{#history}}
+			'{{createdAt}}',
+			{{/history}}
 		],
 		datasets: [
-			{{#holdings}}
 			{
-				label: "{{market}}",
-				data: [],
+				label: "USD",
+				data: [
+					{{#history}}{{amount}},{{/history}}
+				],
+				lineTension: 0.1,
+				borderColor: "rgb(75,192,75)",
+				backgroundColor: "rgba(75,192,75,0.5)",
 			},
-			{{/holdings}}
 		]
 	},
 	options: {
-		scales: {
-			yAxes: [{
-				stacked: true,
-			}],
+		title: {
+			display: true,
+			text: 'USD Over Time'
 		},
-	},
+		scales: {
+			xAxes: [{
+				type: 'time',
+			}],
+			yAxes: [{
+				ticks: {
+					beginAtZero: true,
+				}
+			}]
+		}
+	}
 });
-
 </script>
-
-{{#holdings}}
-MKT: {{market}}
-{{#points}}
-BEGIN: {{amount}} {{currency}} {{exchange}}
-{{/points}}
-{{/holdings}}
