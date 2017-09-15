@@ -118,7 +118,7 @@ function updateHoldingsTable() {
 	data.unshift(['', 'Total', '', '', '', formatNum(sums.BTC), formatNum(sums.USD)]);
 
 	holdingTable.setData({
-		headers: ['Updated', 'Exch', 'Sym', 'Last', 'Owned', 'BTC', 'USD'],
+		headers: ['Updated', 'Exch', 'Sym', 'Last USD', 'Owned', 'BTC', 'USD'],
 		data,
 	});
 }

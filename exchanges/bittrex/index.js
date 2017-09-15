@@ -23,6 +23,20 @@ function makeSignedRequest(method, uri, opts) {
 }
 
 
+function mapOrderType(orderType) {
+	const parts = orderType.split('_');
+	if (parts.length !== 2) {
+		return {
+			type: 'N/A',
+			side: 'N/A',
+		};
+	}
+	return {
+		type: parts[0].toLowerCase(),
+		side: parts[1].toLowerCase(),
+	};
+}
+
 module.exports = {
 	getHoldings() {
 		return makeSignedRequest('GET', '/api/v1.1/account/getbalances')
@@ -43,7 +57,20 @@ module.exports = {
 	},
 
 	getOrders() {
-		return Promise.resolve([]); //TODO
+		return makeSignedRequest('GET', '/api/v1.1/account/getorderhistory')
+			.then(resp => resp.data.result)
+			.map(order => {
+				return _.assign({
+					status: 'F',
+					product: order.Exchange,
+					price: order.Price,
+					size: order.Quantity,
+					date: order.TimeStamp,
+					type: order.OrderType,
+					side: order.OrderType,
+					fee: order.Commission,
+				}, mapOrderType(order.OrderType));
+			});
 	},
 
 	getMarkets() {
