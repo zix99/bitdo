@@ -39,15 +39,24 @@ _.each(context.rules.exchanges, exchangeName => {
 
 function getAllMarkets() {
 	return Promise.map(context.exchanges, exchange => {
-		return exchange.getMarkets();
+		return exchange.getMarkets()
+			.catch(err => {
+				log.warn(`Error fetching market for ${exchange.name}: ${err.message}`);
+				return [];
+			});
 	}).then(_.flatten);
 }
 
 function updateTicker() {
 	return getAllMarkets()
 		.map(market => {
-			return market.exchange.getTicker(market.currency, market.relation);
-		});
+			log.debug(`Fetching ticker for ${market.exchange.name} ${market.currency}:${market.relation}...`);
+			return market.exchange.getTicker(market.currency, market.relation)
+				.catch(err => {
+					log.warn(`Error fetching ticker for ${market.exchange.name} on ${market.currency}:${market.relation}`);
+					return null;
+				});
+		}, {concurrency: 2});
 }
 
 function buildExchangeRateTable() {
@@ -66,7 +75,12 @@ function buildExchangeRateTable() {
 
 function getHoldings() {
 	return Promise.map(context.exchanges, exchange => {
-		return exchange.getHoldings();
+		log.info(`Updating holdings for ${exchange.name}...`);
+		return exchange.getHoldings()
+			.catch(err => {
+				log.warn(`Error fetching holdings from ${exchange.name}: ${err.message}`);
+				return [];
+			});
 	}).then(holdings => _.flatten(holdings));
 }
 
@@ -123,6 +137,8 @@ function poll() {
 		updateHoldings(),
 	]).then(() => {
 		ui.render();
+	}).catch(err => {
+		log.error(err.message);
 	});
 }
 

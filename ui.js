@@ -32,14 +32,14 @@ holdings.focus();
 const holdingData = {};
 function updateHoldingsTable() {
 	let sums = {BTC: 0, USD: 0};
-	const data = _.orderBy(_.map(holdingData, (v, key) => {
+	const data = _.map(_.orderBy(holdingData, x => x.conversions.USD, 'desc'), (v, key) => {
 		sums.BTC += v.conversions.BTC;
 		sums.USD += v.conversions.USD;
 		return [
 			'', v.exchange.name, v.currency,
 			formatNum(v.balance), formatNum(v.conversions.BTC), formatNum(v.conversions.USD)
 		];
-	}), x => x[3], 'desc');
+	})
 	data.unshift([]);
 	data.unshift(['', 'Total', '', '', formatNum(sums.BTC), formatNum(sums.USD)]);
 
@@ -85,6 +85,7 @@ screen.render();
 module.exports = {
 	log(s) {
 		log.log(s);
+		screen.render();
 	},
 
 	render() {
