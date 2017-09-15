@@ -15,6 +15,10 @@ Exchange.prototype.getTicker = function (currency, relation) {
 	{
 		price: float:data.price,
 		volume: float:data.volume,
+		//META:
+		exchange: this,
+		currency,
+		relation,
 	}
 	*/
 	return this._impl.getTicker(currency, relation)
@@ -29,16 +33,39 @@ Exchange.prototype.getHoldings = function () {
 		balance: float:balance,
 		available: float:avail,
 		hold: float:hold,
+		//META:
+		exchange: this
 	}]
 	*/
 	return this._impl.getHoldings()
 		.map(holding => _.assign({exchange: this}, holding));
 }
 
+Exchange.prototype.getOrders = function() {
+	/*
+	[{
+		status: 'O', // O=open, F=filled, X=canceled/rejected, ? = unknown/other
+		product: order.product,
+		price: order.price,
+		size: order.size,
+		date: order.created_at,
+		type: order.type,
+		side: order.size,
+		fee: order.fill_fees,
+		//META:
+		exchange: this
+	}]
+	*/
+	return this._impl.getOrders()
+		.map(order => _.assign({exchange: this}, order));
+}
+
 Exchange.prototype.__getMarkets = function() {
 	/*[{
 		currency: product.base_currency,
 		relation: product.quote_currency,
+		//META:
+		exchange: this,
 	}]*/
 	return this._impl.getMarkets()
 		.map(market => _.assign({exchange: this}, market));

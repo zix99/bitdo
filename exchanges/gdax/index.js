@@ -44,9 +44,30 @@ function executeRequest(method, uri, body) {
 		}).then(resp => resp.data);
 }
 
+function getStatusCode(status) {
+	switch (status) {
+		case 'done': return 'F';
+		case 'active': return 'O';
+		case 'rejected': return 'X';
+	}
+	return '?';
+}
+
 module.exports = {
 	getOrders() {
-		return executeRequest('GET', '/orders?status=all');
+		return executeRequest('GET', '/orders?status=all')
+			.map(order => {
+				return {
+					status: getStatusCode(order.status),
+					product: order.product_id,
+					price: order.price,
+					size: order.size,
+					date: order.created_at,
+					type: order.type,
+					side: order.side,
+					fee: order.fill_fees,
+				}
+			});
 	},
 
 	getHoldings() {

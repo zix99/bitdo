@@ -147,9 +147,21 @@ function updateHoldings() {
 	});
 }
 
+function updateOrders() {
+	log.info('Fetching orders...');
+	return Promise.map(context.exchanges, exchange => exchange.getOrders())
+		.then(_.flatten)
+		.then(orders => {
+			ui.updateOrders(orders);
+		}).catch(err => {
+			log.error(`Error updating orders: ${err.message}`);
+		});
+}
+
 function poll() {
 	log.info('Polling...');
 	Promise.all([
+		updateOrders(),
 		updateHoldings(),
 	]).then(() => {
 		ui.render();
