@@ -112,11 +112,15 @@ function updateHoldings() {
 		getHoldings(),
 		buildExchangeRateTable(),
 	]).spread((holdings, rates) => {
+		const sums = _.reduce(config.currencies, (o, i) => {
+			o[i] = 0;
+			return o;
+		}, {});
 		_.each(holdings, holding => {
 			holding.conversions = {};
 			_.each(config.currencies, pc => {
 				const toPcRate = getRateBetweenCurrencies(rates, holding.currency, pc);
-				holding.conversions[pc] = holding.balance * toPcRate;
+				sums[pc] += holding.conversions[pc] = holding.balance * toPcRate;
 			})
 			console.dir(holding);
 			ui.updateHolding(holding);
@@ -126,6 +130,13 @@ function updateHoldings() {
 				amount: holding.balance,
 				amountUsd: holding.conversions.USD,
 				amountBtc: holding.conversions.BTC,
+			})
+		});
+
+		_.each(sums, (val, currency) => {
+			db.Historicals.create({
+				currency,
+				amount: val,
 			})
 		});
 	});
