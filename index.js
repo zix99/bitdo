@@ -139,6 +139,8 @@ function updateHoldings() {
 				amount: val,
 			})
 		});
+
+		log.info('Update complete.');
 	});
 }
 
