@@ -1,7 +1,6 @@
 {
 	"exchanges" : ["gdax", "mock", "bittrex"],
 	"plugins" : ["web"],
-	"primary_currencies" : ["BTC", "USD"],
 	"period": "10m",
 	"rules": [
 		{

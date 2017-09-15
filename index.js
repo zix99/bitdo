@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const log = require('./log');
+const config = require('./config');
 const Promise = require('bluebird');
 const fs = require('fs');
 const _ = require('lodash');
@@ -9,6 +9,7 @@ const PluginSet = require('./lib/pluginset');
 const ui = require('./ui');
 const duration = require('./lib/duration');
 const db = require('./db');
+const log = require('./log');
 
 const context = {
 	rules: {},
@@ -50,7 +51,7 @@ function updateTicker() {
 }
 
 function buildExchangeRateTable() {
-	const TARGETS = context.rules.primary_currencies;
+	const TARGETS = config.currencies;
 	return updateTicker()
 		.then(tickers => {
 			let data = {};
@@ -99,7 +100,7 @@ function updateHoldings() {
 	]).spread((holdings, rates) => {
 		_.each(holdings, holding => {
 			holding.conversions = {};
-			_.each(context.rules.primary_currencies, pc => {
+			_.each(config.currencies, pc => {
 				const toPcRate = getRateBetweenCurrencies(rates, holding.currency, pc);
 				holding.conversions[pc] = holding.balance * toPcRate;
 			})
