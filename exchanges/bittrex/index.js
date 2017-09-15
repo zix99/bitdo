@@ -57,20 +57,32 @@ module.exports = {
 	},
 
 	getOrders() {
-		return makeSignedRequest('GET', '/api/v1.1/account/getorderhistory')
-			.then(resp => resp.data.result)
-			.map(order => {
-				return _.assign({
-					status: 'F',
-					product: order.Exchange,
-					price: order.Price,
-					size: order.Quantity,
-					date: order.TimeStamp,
-					type: order.OrderType,
-					side: order.OrderType,
-					fee: order.Commission,
-				}, mapOrderType(order.OrderType));
-			});
+		return Promise.all([
+			makeSignedRequest('GET', '/api/v1.1/account/getorderhistory')
+				.then(resp => resp.data.result)
+				.map(order => {
+					return _.assign({
+						status: 'F',
+						product: order.Exchange,
+						price: order.Price,
+						size: order.Quantity,
+						date: order.TimeStamp,
+						fee: order.Commission,
+					}, mapOrderType(order.OrderType));
+				}),
+			makeSignedRequest('GET', '/api/v1.1/market/getopenorders')
+				.then(resp => resp.data.result)
+				.map(order => {
+					return _.assign({
+						status: 'O',
+						product: order.Exchange,
+						price: order.Price,
+						size: order.Quantity,
+						date: order.Opened,
+						fee: 0,
+					}, mapOrderType(order.OrderType));
+				}),
+		]).then(_.flatten);
 	},
 
 	getMarkets() {
