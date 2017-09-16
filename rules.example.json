@@ -1,6 +1,4 @@
 {
-	"exchanges" : ["gdax", "mock", "bittrex"],
-	"plugins" : ["web"],
 	"period": "10m",
 	"rules": [
 		{

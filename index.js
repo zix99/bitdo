@@ -22,13 +22,13 @@ context.rules = JSON.parse(fs.readFileSync('rules.json', {encoding: 'utf8'}));
 
 // Initialize plugins
 const plugins = new PluginSet();
-_.each(context.rules.plugins, pluginName => {
+_.each(config.plugin, pluginName => {
 	log.info(`Loading plugin '${pluginName}'...`);
 	plugins.push(Plugins.createPlugin(pluginName, context));
 });
 
 // Initialize exchanges
-_.each(context.rules.exchanges, exchangeName => {
+_.each(config.exchange, exchangeName => {
 	log.info(`Loading exchange '${exchangeName}'...`);
 	const exchange = Exchanges.createExchange(exchangeName);
 	context.exchanges.push(exchange);

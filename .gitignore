@@ -3,6 +3,7 @@ rules.json
 .gdaxrc
 .bittrexrc
 db.sqlite
+bitdo.conf
 
 # Logs
 logs

@@ -103,7 +103,7 @@ screen.render();
 
 const holdingData = {};
 function updateHoldingsTable() {
-	let sums = _. {BTC: 0, USD: 0};
+	let sums = {BTC: 0, USD: 0};
 	const data = _.map(_.orderBy(holdingData, x => x.conversions[config.primary], 'desc'), (v, key) => {
 		sums.BTC += v.conversions.BTC;
 		sums.USD += v.conversions.USD;
