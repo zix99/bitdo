@@ -18,7 +18,22 @@ const context = {
 };
 
 // Load the rules
-context.rules = JSON.parse(fs.readFileSync(config.rules, {encoding: 'utf8'}));
+function reloadRulesFile() {
+	log.info(`Loading rules file ${config.rules}...`);
+	try {
+		context.rules = JSON.parse(fs.readFileSync(config.rules, {encoding: 'utf8'}));
+		log.info(`Rules successfully loaded`);
+	} catch(err) {
+		log.warn('Error loading rules file: ' + err);
+	}
+}
+fs.watch(config.rules, {persistent: false}, (event) => {
+	if (event === 'change') {
+		reloadRulesFile();
+	}
+});
+reloadRulesFile();
+
 
 // Initialize plugins
 const plugins = new PluginSet();
