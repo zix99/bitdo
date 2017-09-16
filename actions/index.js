@@ -23,7 +23,6 @@ Rule specificiation:
 	_symbol: "Symbol for state",
 	_ignore: "Ignore the statement",
 	_orderId: "123", // Id for order to keep track of it
-	_activated: true/false, // Whether the order has been 'activated'
 }
 **/
 
@@ -115,12 +114,7 @@ const lib = {
 					rule._symbol = 'T';
 
 					const action = instantiateActionByName(rule.action);
-					const fullRule = _.assign({}, RULE_DEFAULTS, rule);
-					return action(fullRule, context)
-						.then(ret => {
-							ret._symbol = 'E';
-							return ret;
-						});
+					return action(rule, context);
 				} else {
 					return Promise.resolve(false);
 				}

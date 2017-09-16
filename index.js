@@ -21,22 +21,20 @@ const context = {
 	db,
 };
 
+let lastRulesDate = 0;
+
 // Load the rules
 function reloadRulesFile() {
 	log.info(`Loading rules file ${config.rules}...`);
 	try {
 		context.rules = JSON.parse(fs.readFileSync(config.rules, {encoding: 'utf8'}));
+		lastRulesDate = new Date();
 		log.info(`Rules successfully loaded`);
 	} catch(err) {
 		log.warn('Error loading rules file: ' + err);
 	}
 	ui.updateRules(context.rules.rules);
 }
-fs.watch(config.rules, {persistent: false}, (event) => {
-	if (event === 'change') {
-		reloadRulesFile();
-	}
-});
 reloadRulesFile();
 
 
@@ -193,11 +191,19 @@ function updateOrders() {
 		});
 }
 
+function saveRules() {
+	log.info(`Save updated rules to ${config.rules}...`);
+	lastRulesDate = new Date();
+	fs.writeFileSync(config.rules, JSON.stringify(context.rules, null, '\t'));
+}
+
 function evaluateRules() {
 	return actions.evaluateRuleSet(context)
 		.then(ret => {
-			//console.log(JSON.stringify(ret));
+			const previousState = _.cloneDeep(context.rules);
 			ui.updateRules(context.rules.rules);
+			if (!_.isEqual(previousState, context.rules))
+				saveRules();
 		}).catch(err => {
 			log.error(`Error evaluating ruleset: ${err}`);
 		})
@@ -230,5 +236,14 @@ function main() {
 	fastPoll();
 	setInterval(poll, period.asMilliseconds());
 	setInterval(fastPoll, 60 * 1000);
+
+	// Watch rules
+	fs.watch(config.rules, {persistent: false}, (event, thing) => {
+		if (event === 'change' && (new Date() - lastRulesDate) > 1000) { // Delay to not pick up a save
+			reloadRulesFile();
+			ui.updateRules(context.rules.rules);
+			evaluateRules();
+		}
+	});
 }
 db.db.sync().then(() => main());
