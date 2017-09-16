@@ -1,21 +1,126 @@
 const _ = require('lodash');
+const Promise = require('bluebird');
+const log = require('../log');
+
+/**
+Rule specificiation:
+{
+	"product" : "BTC-USD",		// Product to monitor against
+	"action" : "buy-limit",		// Action to trigger
+	"mode" : "remove",			// How it reacts to the trigger being completed [keep, remove, decrement]
+	"triggerprice" : "100",		// RelPrice to trigger at
+	"compareprice" : "last",	// What to compare the price to (analytics name)
+	"activate" : "3%",			// What threshold to "activate" at (send to the exchange)
+	"amount" : "100%"			// How much money, as relative to holdings, to execute with, relative to asking price
+
+	// Optional:
+	description: "Something to help you remember",
+
+	// Internal
+	_state: "State to display in UI",
+	_symbol: "Symbol for state",
+	_ignore: "Ignore the statement",
+	_orderId: "123", // Id for order to keep track of it
+	_activated: true/false, // Whether the order has been 'activated'
+}
+**/
+
+/**
+Actions:
+function(rule, product, context){}
+
+Product: {
+	createLimitBuy();
+	createLimitSell();
+}
+Returns: Modified rule, rejected=error
+
+**/
+
+const RULE_DEFAULTS = {
+	mode: 'remove',
+	compareprice: 'last',
+	activate: '3%',
+	amount: '100%',
+};
+
+
+// Wrap the rule with a set of convenient helpers that can be used by the executor
+function ruleWrapInterface(rule) {
+	return _.assign(rule, {
+		ignore() {
+			this._ignore = true;
+			return this;
+		}
+	});
+}
+
+// Parses a `val` in relation to a comparison
+// Can be constant, percentage offset, constant offset, with tolerance (randomness).
+// eg: 5, +5, -5, +5%, -5%, +5%~2, +5~1
+const RELNUM_REGEX = /([+-])?(\d+)(%)?(?:~(\d+))?/i;
+function getRelativeNumber(val, comparison) {
+	const match = ('' + val).match(RELNUM_REGEX);
+	if (!match)
+		throw Error(`Unable to parse relnum of '${val}'`);
+
+	const [a, prefix, base, operator, tolerance] = match;
+	let result = parseInt(base);
+
+	if (operator === '%') {
+		const direction = prefix || '+';
+		result = comparison + (base / 100.0) * comparison * (direction === '-' ? -1 : 1);
+	} else if (prefix === '-') {
+		result = comparison - result;
+	} else if (prefix === '+') {
+		result = comparison + result;
+	}
+
+	if (tolerance) {
+		result += (Math.random() * 2 - 1) * tolerance;
+	}
+
+	return result;
+}
 
 function instantiateActionByName(name) {
 	return require(`./${name}`);
 }
 
+function compareVals(left, compartor, right) {
+	switch(compartor) {
+		case '<': return left < right;
+		case '<=': return left <= right;
+		case '>': return left > right;
+		case '>=': return left >= right;
+		case '=': return left === right;
+	}
+	return false;
+}
+
 const lib = {
-	evaluateAction(rule, context) {
+	evaluateAction(rule, product, context) {
+		log.info(`Evaluating rule ${rule.description || rule.action}`);
+
+		const analyticsRet = 0; //TODO: Evaluate compare/analytics to get this value
+
+		const targetPrice = getRelativeNumber(rule.triggerprice, analyticsRet);
+
 		const action = instantiateActionByName(rule.action);
-		return action(_.clone(rule), context);
+		const fullRule = _.assign({}, RULE_DEFAULTS, rule);
+		return action(fullRule, context)
+			.then(ret => {
+				ret._symbol = 'E';
+				return ret;
+			});
 	},
 
-	evaulateRuleSet(context) {
+	evaluateRuleSet(context) {
 		if (!context.rules)
 			return Promise.reject('No rules to evaluate');
 
-		return Promise.mapSeries(context.rules, rule => {
-			return lib.evaluateAction(rule, context)
+		return Promise.mapSeries(context.rules.rules, rule => {
+			return lib.evaluateAction(rule, null, context)
 				.then(result => {
 					return result ? result : rule;
 				}).catch(err => {

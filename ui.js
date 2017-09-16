@@ -180,10 +180,12 @@ module.exports = {
 
 	updateRules(rules) {
 		const rows = _.map(rules, rule => {
-			return [rule.symbol || '?', rule.action, rule.triggerprice, rule.amount, rule._activated || false, rule._state || ''];
+			if (rule._ignore)
+				return null;
+			return [rule._symbol || '?', rule.product, rule.action, rule.description || '', rule.triggerprice, rule.amount, rule._state || ''];
 		});
-		rows.unshift(['', 'Action', 'Trigger', 'Amount', 'Activated', 'State']);
-		ruleTable.setData(rows);
+		rows.unshift(['', 'Product', 'Action', 'Desc', 'Trigger', 'Amount', 'State']);
+		ruleTable.setData(_.filter(rows, x => x !== null));
 		screen.render();
 	}
 };

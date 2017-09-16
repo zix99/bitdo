@@ -5,6 +5,7 @@ const fs = require('fs');
 const _ = require('lodash');
 const Exchanges = require('./exchanges');
 const Plugins = require('./plugins');
+const actions = require('./actions');
 const PluginSet = require('./lib/pluginset');
 const ui = require('./ui');
 const duration = require('./lib/duration');
@@ -175,7 +176,10 @@ function updateOrders() {
 }
 
 function evaluateRules() {
-	return Promise.resolve();
+	return actions.evaluateRuleSet(context)
+		.then(ret => {
+			console.log(JSON.stringify(ret));
+		});
 }
 
 function poll() {
