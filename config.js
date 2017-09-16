@@ -24,6 +24,8 @@ const config = require('yargs')
 	.boolean('v')
 	.alias('v', 'verbose')
 	.describe('v', 'Display debug text in log')
+	.describe('noredirect', 'Do not redirect stdout/stderr to UI')
+	.boolean('noredirect')
 	.argv;
 
 if (fs.existsSync(config.conf)) {

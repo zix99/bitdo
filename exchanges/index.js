@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const memoize = require('memoizee');
+const fs = require('fs');
 
 function Exchange(name, impl) {
 	this.name = name;
@@ -71,9 +72,17 @@ Exchange.prototype.__getMarkets = function() {
 		.map(market => _.assign({exchange: this}, market));
 }
 
+function requireExchange(name) {
+	if (fs.existsSync(`${__dirname}/${name}`))
+		return require(`./${name}`);
+	if (fs.existsSync(`${__dirname}/${name}.js`))
+		return require(`./${name}.js`);
+	return require(`bitdo-exchange-${name}`);
+}
+
 module.exports = {
 	createExchange(name) {
 		// Simple for now, will wrap in the future.
-		return new Exchange(name, require(`./${name}`));
+		return new Exchange(name, requireExchange(name));
 	}
 };

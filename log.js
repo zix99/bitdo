@@ -16,16 +16,18 @@ const log = new (winston.Logger)({
   ],
 });
 
-console.log = function(txt) {
-	log.info(txt);
-};
+if (!config.noredirect) {
+  console.log = function(txt) {
+  	log.info(txt);
+  };
 
-console.dir = function(obj) {
-	log.debug(JSON.stringify(obj));
-}
+  console.dir = function(obj) {
+  	log.debug(JSON.stringify(obj));
+  }
 
-console.err = function(txt) {
-  log.error(txt);
+  console.err = function(txt) {
+    log.error(txt);
+  }
 }
 
 module.exports = log;
