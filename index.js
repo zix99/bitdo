@@ -18,7 +18,7 @@ const context = {
 };
 
 // Load the rules
-context.rules = JSON.parse(fs.readFileSync('rules.json', {encoding: 'utf8'}));
+context.rules = JSON.parse(fs.readFileSync(config.rules, {encoding: 'utf8'}));
 
 // Initialize plugins
 const plugins = new PluginSet();
