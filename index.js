@@ -191,7 +191,10 @@ function evaluateRules() {
 	return actions.evaluateRuleSet(context)
 		.then(ret => {
 			//console.log(JSON.stringify(ret));
-		});
+			ui.updateRules(context.rules.rules);
+		}).catch(err => {
+			log.error(`Error evaluating ruleset: ${err}`);
+		})
 }
 
 function poll() {

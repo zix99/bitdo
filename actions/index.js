@@ -1,6 +1,7 @@
 const _ = require('lodash');
 const Promise = require('bluebird');
 const log = require('../log');
+const analysis = require('../analysis');
 
 /**
 Rule specificiation:
@@ -10,6 +11,7 @@ Rule specificiation:
 	"mode" : "remove",			// How it reacts to the trigger being completed [keep, remove, decrement]
 	"triggerprice" : "100",		// RelPrice to trigger at
 	"compareprice" : "last",	// What to compare the price to (analytics name)
+	"comparator" : "<",			// How to compare target price and trigger price
 	"activate" : "3%",			// What threshold to "activate" at (send to the exchange)
 	"amount" : "100%"			// How much money, as relative to holdings, to execute with, relative to asking price
 
@@ -99,19 +101,29 @@ function compareVals(left, compartor, right) {
 }
 
 const lib = {
-	evaluateAction(rule, product, context) {
+	evaluateAction(rule, market, context) {
 		log.info(`Evaluating rule ${rule.description || rule.action}`);
 
-		const analyticsRet = 0; //TODO: Evaluate compare/analytics to get this value
+		return analysis.evaluateMetric(rule.compareprice, market, context)
+			.then(analyticsPrice => {
+				const targetPrice = getRelativeNumber(rule.triggerprice, analyticsPrice);
 
-		const targetPrice = getRelativeNumber(rule.triggerprice, analyticsRet);
+				rule._state = `${targetPrice - analyticsPrice}`;
+				rule._symbol = 'W';
 
-		const action = instantiateActionByName(rule.action);
-		const fullRule = _.assign({}, RULE_DEFAULTS, rule);
-		return action(fullRule, context)
-			.then(ret => {
-				ret._symbol = 'E';
-				return ret;
+				if (compareVals(analyticsPrice, rule.comparator, targetPrice)) {
+					rule._symbol = 'T';
+
+					const action = instantiateActionByName(rule.action);
+					const fullRule = _.assign({}, RULE_DEFAULTS, rule);
+					return action(fullRule, context)
+						.then(ret => {
+							ret._symbol = 'E';
+							return ret;
+						});
+				} else {
+					return Promise.resolve(false);
+				}
 			});
 	},
 
@@ -120,10 +132,12 @@ const lib = {
 			return Promise.reject('No rules to evaluate');
 
 		return Promise.mapSeries(context.rules.rules, rule => {
-			return lib.evaluateAction(rule, null, context)
-				.then(result => {
-					return result ? result : rule;
-				}).catch(err => {
+			const market = context.markets[rule.market];
+			if (!market)
+				throw Error(`Unable to find market ${rule.market}`);
+
+			return lib.evaluateAction(rule, market, context)
+				.catch(err => {
 					log.warn(`Error evaluating rule ${rule}: ${err}`);
 					return rule;
 				});
