@@ -15,6 +15,9 @@ const log = require('./log');
 const context = {
 	rules: {},
 	exchanges: [],
+	holdings: {},
+	markets: {},
+	plugins: null,
 	db,
 };
 
@@ -38,7 +41,7 @@ reloadRulesFile();
 
 
 // Initialize plugins
-const plugins = new PluginSet();
+const plugins = context.plugins = new PluginSet();
 _.each(config.plugin, pluginName => {
 	log.info(`Loading plugin '${pluginName}'...`);
 	plugins.push(Plugins.createPlugin(pluginName, context));
@@ -65,6 +68,7 @@ function getAllMarkets() {
 }
 
 function updateTicker() {
+	log.info(`Updating ticker data...`);
 	return getAllMarkets()
 		.map(market => {
 			log.debug(`Fetching ticker for ${market.exchange.name} ${market.currency}:${market.relation}...`);
@@ -73,24 +77,27 @@ function updateTicker() {
 					log.warn(`Error fetching ticker for ${market.exchange.name} on ${market.currency}:${market.relation}`);
 					return null;
 				});
-		}, {concurrency: 2});
-}
-
-function buildExchangeRateTable() {
-	const TARGETS = config.currencies;
-	return updateTicker()
-		.then(tickers => {
-			let data = {};
-			_.each(tickers, ticker => {
-				if (_.includes(TARGETS, ticker.relation)) {
-					data[`${ticker.currency}-${ticker.relation}`] = ticker.price;
-				}
+		}, {concurrency: 2})
+		.filter(x => x !== null)
+		.then(markets => {
+			_.each(markets, market => {
+				context.markets[`${market.exchange.name}:${market.currency}-${market.relation}`] = market;
 			});
-			return data;
+			return markets;
 		});
 }
 
-function getHoldings() {
+function buildExchangeRateTable(markets) {
+	let data = {};
+	_.each(markets, ticker => {
+		if (_.includes(config.currencies, ticker.relation)) {
+			data[`${ticker.currency}-${ticker.relation}`] = ticker.price;
+		}
+	});
+	return data;
+}
+
+function getAllHoldings() {
 	return Promise.map(context.exchanges, exchange => {
 		log.info(`Updating holdings for ${exchange.name}...`);
 		return exchange.getHoldings()
@@ -126,23 +133,25 @@ function getRateBetweenCurrencies(rateTable, from, to) {
 
 function updateHoldings() {
 	return Promise.all([
-		getHoldings(),
-		buildExchangeRateTable(),
-	]).spread((holdings, rates) => {
+		getAllHoldings(),
+		updateTicker(),
+	]).spread((holdings, markets) => {
+		const rates = buildExchangeRateTable(markets);
 		const sums = _.reduce(config.currencies, (o, i) => {
 			o[i] = 0;
 			return o;
 		}, {});
 		_.each(holdings, holding => {
-			holding.updatedAt = new Date();
 			holding.conversions = {};
 			holding.ticker = {};
 			_.each(config.currencies, pc => {
 				const toPcRate = getRateBetweenCurrencies(rates, holding.currency, pc);
 				holding.ticker[pc] = toPcRate;
 				sums[pc] += holding.conversions[pc] = holding.balance * toPcRate;
-			})
-			console.dir(holding);
+			});
+
+			context.holdings[`${holding.exchange.name}:${holding.currency}`] = holding;
+
 			ui.updateHolding(holding);
 			db.Holdings.create({
 				exchange: holding.exchange.name,
@@ -150,17 +159,19 @@ function updateHoldings() {
 				amount: holding.balance,
 				amountUsd: holding.conversions.USD,	//TODO: Ideally, this won't be hardcoded
 				amountBtc: holding.conversions.BTC,
-			})
+			});
 		});
 
 		_.each(sums, (val, currency) => {
 			db.Historicals.create({
 				currency,
 				amount: val,
-			})
+			});
+			plugins.event('onHoldingTotal', currency, val);
 		});
 
 		log.info('Update complete.');
+		plugins.event('onHoldingUpdated');
 	});
 }
 
@@ -169,6 +180,7 @@ function updateOrders() {
 	return Promise.map(context.exchanges, exchange => exchange.getOrders())
 		.then(_.flatten)
 		.then(orders => {
+			plugins.event('onOrderUpdated');
 			ui.updateOrders(orders);
 		}).catch(err => {
 			log.error(`Error updating orders: ${err.message}`);
@@ -178,14 +190,13 @@ function updateOrders() {
 function evaluateRules() {
 	return actions.evaluateRuleSet(context)
 		.then(ret => {
-			console.log(JSON.stringify(ret));
+			//console.log(JSON.stringify(ret));
 		});
 }
 
 function poll() {
 	log.info('Polling...');
 	Promise.all([
-		updateOrders(),
 		updateHoldings(),
 	]).then(() => {
 		ui.render();
@@ -195,10 +206,20 @@ function poll() {
 	});
 }
 
+function fastPoll() {
+	Promise.all([
+		updateOrders(),
+	]).then(() => {
+		ui.render();
+	});
+}
+
 function main() {
 	const period = duration.parse(context.rules.period);
 	log.info(`Polling every ${period.asMinutes()} minutes...`);
 	poll();
+	fastPoll();
 	setInterval(poll, period.asMilliseconds());
+	setInterval(fastPoll, 60 * 1000);
 }
 db.db.sync().then(() => main());

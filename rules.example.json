@@ -2,7 +2,7 @@
 	"period": "10m",
 	"rules": [
 		{
-			"product" : "LTC-USD",
+			"product" : "gdax:LTC-USD",
 			"action" : "buy-limit",
 			"mode" : "remove",
 			"triggerprice" : "100",
@@ -11,7 +11,7 @@
 			"amount" : "100%"
 		},
 		{
-			"product" : "LTC-USD",
+			"product" : "gdax:LTC-USD",
 			"action" : "sell-limit",
 			"mode" : "decrement",
 			"triggerprice" : "150",
@@ -20,7 +20,7 @@
 			"amount" : "100%"
 		},
 		{
-			"product" : "LTC-USD",
+			"product" : "gdax:LTC-USD",
 			"description" : "Trailing stop -5% avg",
 			"action" : "sell-limit",
 			"mode" : "forever",

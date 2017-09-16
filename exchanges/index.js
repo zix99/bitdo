@@ -39,7 +39,7 @@ Exchange.prototype.getHoldings = function () {
 	}]
 	*/
 	return this._impl.getHoldings()
-		.map(holding => _.assign({exchange: this}, holding));
+		.map(holding => _.assign({exchange: this, updatedAt: new Date()}, holding));
 }
 
 Exchange.prototype.getOrders = function() {

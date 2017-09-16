@@ -5,7 +5,7 @@ const log = require('../log');
 /**
 Rule specificiation:
 {
-	"product" : "BTC-USD",		// Product to monitor against
+	"product" : "gdax:BTC-USD",	// Product to monitor against
 	"action" : "buy-limit",		// Action to trigger
 	"mode" : "remove",			// How it reacts to the trigger being completed [keep, remove, decrement]
 	"triggerprice" : "100",		// RelPrice to trigger at
