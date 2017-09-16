@@ -81,7 +81,13 @@ function updateTicker() {
 		.filter(x => x !== null)
 		.then(markets => {
 			_.each(markets, market => {
-				context.markets[`${market.exchange.name}:${market.currency}-${market.relation}`] = market;
+				db.Tickers.create({
+					exchange: market.exchange.name,
+					currency: market.currency,
+					relation: market.relation,
+					price: market.price,
+				});
+				context.markets[market.id] = market;
 			});
 			return markets;
 		});

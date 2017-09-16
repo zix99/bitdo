@@ -17,6 +17,6 @@ module.exports = {
 		if (!metric)
 			throw Error('Unable to load metric');
 
-		return Promise.resolve(metric(metricData, market, context));
+		return Promise.resolve(metric.call(metricData, market, context));
 	}
 };

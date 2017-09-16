@@ -2,7 +2,7 @@
 	"period": "10m",
 	"rules": [
 		{
-			"market" : "gdax:LTC-USD",
+			"market" : "GDAX:LTC-USD",
 			"action" : "buy-limit",
 			"mode" : "remove",
 			"triggerprice" : "100",
@@ -11,7 +11,7 @@
 			"amount" : "100%"
 		},
 		{
-			"market" : "gdax:LTC-USD",
+			"market" : "GDAX:LTC-USD",
 			"action" : "sell-limit",
 			"mode" : "decrement",
 			"triggerprice" : "150",
@@ -20,7 +20,7 @@
 			"amount" : "100%"
 		},
 		{
-			"market" : "gdax:LTC-USD",
+			"market" : "GDAX:LTC-USD",
 			"description" : "Trail-stp",
 			"action" : "sell-limit",
 			"mode" : "forever",

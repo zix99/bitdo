@@ -1,2 +1,2 @@
 
-module.exports = (metric, market) => market.price;
+module.exports = (market) => market.price;
