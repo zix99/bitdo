@@ -4,7 +4,30 @@
 		{
 			"action" : "buy-limit",
 			"mode" : "remove",
-			"price" : "100"
+			"triggerprice" : "100",
+			"compareprice" : "last",
+			"activate" : "3%",
+			"amount" : "100%"
+		},
+		{
+			"action" : "sell-limit",
+			"mode" : "decrement",
+			"triggerprice" : "150",
+			"compareprice" : "last",
+			"activate" : "3%",
+			"amount" : "100%"
+		},
+		{
+			"description" : "Trailing stop -5% avg",
+			"action" : "sell-limit",
+			"mode" : "forever",
+			"triggerprice" : "-5%",
+			"compareprice" : {
+				"type" : "average",
+				"period" : "20m"
+			},
+			"activate" : "1%",
+			"amount" : "100%"
 		}
 	]
 }

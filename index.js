@@ -26,6 +26,7 @@ function reloadRulesFile() {
 	} catch(err) {
 		log.warn('Error loading rules file: ' + err);
 	}
+	ui.updateRules(context.rules.rules);
 }
 fs.watch(config.rules, {persistent: false}, (event) => {
 	if (event === 'change') {
@@ -173,6 +174,10 @@ function updateOrders() {
 		});
 }
 
+function evaluateRules() {
+	return Promise.resolve();
+}
+
 function poll() {
 	log.info('Polling...');
 	Promise.all([
@@ -180,6 +185,7 @@ function poll() {
 		updateHoldings(),
 	]).then(() => {
 		ui.render();
+		return evaluateRules();
 	}).catch(err => {
 		log.error(err.message);
 	});

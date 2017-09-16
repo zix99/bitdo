@@ -176,5 +176,14 @@ module.exports = {
 		rows.unshift(['', 'Created', 'Exchange', 'Product', 'Side', 'Type', 'Size', 'Price', 'Fee']);
 		orderTable.setData(rows);
 		screen.render();
+	},
+
+	updateRules(rules) {
+		const rows = _.map(rules, rule => {
+			return [rule.symbol || '?', rule.action, rule.triggerprice, rule.amount, rule._activated || false, rule._state || ''];
+		});
+		rows.unshift(['', 'Action', 'Trigger', 'Amount', 'Activated', 'State']);
+		ruleTable.setData(rows);
+		screen.render();
 	}
 };
