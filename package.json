@@ -8,7 +8,8 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "lint": "eslint .",
-    "release": "npm version patch && git push --tags && npm publish"
+    "release": "npm version patch && git push --tags && npm publish",
+    "postinstall": "./scripts/postinstall.sh"
   },
   "bin": {
     "bitdo": "./index.js"
@@ -30,11 +31,7 @@
     "sequelize": "^4.8.3",
     "sqlite3": "^3.1.11",
     "winston": "^2.3.1",
-    "yargs": "^8.0.2",
-    "bitdo-plugin-web": "file:plugins/web",
-    "bitdo-exchange-gdax": "file:exchanges/gdax",
-    "bitdo-exchange-bittrex": "file:exchanges/bittrex",
-    "bitdo-exchange-mock": "file:exchanges/mock"
+    "yargs": "^8.0.2"
   },
   "devDependencies": {
     "eslint": "^4.5.0",
