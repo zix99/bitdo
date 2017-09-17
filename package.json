@@ -1,6 +1,6 @@
 {
   "name": "bitdo",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A cryptocurrency order-rule executor",
   "repository": "zix99/bitdo",
   "main": "index.js",
@@ -8,8 +8,8 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "lint": "eslint .",
-    "postinstall" : "./scripts/postinstall.sh",
-    "release" : "npm version patch && git push && npm publish"
+    "postinstall": "./scripts/postinstall.sh",
+    "release": "npm version patch && git push && npm publish"
   },
   "bin": {
     "bitdo": "./index.js"
