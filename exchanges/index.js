@@ -73,6 +73,10 @@ Exchange.prototype.__getMarkets = function() {
 }
 
 function requireExchange(name) {
+	if (fs.existsSync(`${__dirname}/${name}`))
+		return require(`./${name}`);
+	if (fs.existsSync(`${__dirname}/${name}.js`))
+		return require(`./${name}.js`);
 	return require(`bitdo-exchange-${name}`);
 }
 
