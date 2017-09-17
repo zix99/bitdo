@@ -1,6 +1,6 @@
 {
   "name": "bitdo",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "A cryptocurrency order-rule executor",
   "repository": "zix99/bitdo",
   "main": "index.js",
