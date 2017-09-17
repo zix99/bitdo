@@ -1,5 +1,5 @@
 {
-  "name": "bitdo-gdax",
+  "name": "bitdo-exchange-gdax",
   "version": "1.0.0",
   "description": "bitdo exchange implementation",
   "main": "index.js",

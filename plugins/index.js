@@ -12,10 +12,6 @@ Plugin.prototype.onHoldingUpdate = function (holding) {
 };
 
 function requirePlugin(name) {
-	if (fs.existsSync(`${__dirname}/${name}`))
-		return require(`./${name}`);
-	if (fs.existsSync(`${__dirname}/${name}.js`))
-		return require(`./${name}.js`);
 	return require(`bitdo-plugin-${name}`);
 }
 
