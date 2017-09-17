@@ -66,6 +66,13 @@ and also plugins installed globally with the name `bitdo-plugin-*`.
 The `web` plugin will bind to a port and expose information about your trading system via the port.  See the
 [readme for the web plugin](/plugins/web) for more information.
 
+### Running
+
+Once configuration is all set up, you can run simply by executing `bitdo`.
+
+Keep in mind, it's probably good to run it in its own directory, as it will output log files
+and its sqlite database in the current directory.
+
 ## Running Locally
 
 Make sure to follow the above configuration to setup some exchanges to use with bitdo.  When in doubt,
