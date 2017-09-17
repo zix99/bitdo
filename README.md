@@ -7,13 +7,69 @@ automated trades at preset points.
 
 ## Installing
 
-Make sure to use at least node 6.x
+Make sure to use at least node 6.x. You can always find the version of node I'm using in the [.nvmrc](.nvmrc) file.
 
 ```bash
 npm install -g bitdo
 ```
 
+### Configuration
+
+There are a set of files and configurations you need in order to leverage bitdo fully.
+
+Let's start first by setting up your exchanges.
+
+#### bitdo.conf
+
+This configuration file can be used in place of cli arguments. It is JSON, and holds anything
+you don't want to type each time.  bitdo will look for `bitdo.conf` in the current directory.
+
+Example:
+```json
+{
+	"exchange" : ["gdax"]
+}
+```
+
+#### Exchanges
+
+There are a few exchanges built-in by default.
+
+gdax API setup: (`.gdaxrc`)
+```
+passphrase=xxx
+key=yyy
+b64secret=zzz
+```
+
+bittrex API setup: (`.bittrexrc`)
+```
+apikey=aaa
+apisecret=bbb
+```
+
+#### Rules File
+
+The `rules.json` file contains the core auto-trading rules of your program.
+
+TODO: Add documentation of rules file.
+
+### Plugins
+
+The plugins are also controlled via arguments or the `bitdo.conf` file.
+
+There are a few available plugins that come with bitdo.  bitdo will look for plugins in its `plugins/` folder,
+and also plugins installed globally with the name `bitdo-plugin-*`.
+
+#### web
+
+The `web` plugin will bind to a port and expose information about your trading system via the port.  See the
+[readme for the web plugin](/plugins/web) for more information.
+
 ## Running Locally
+
+Make sure to follow the above configuration to setup some exchanges to use with bitdo.  When in doubt,
+you can use the `mock` exchange while developing to test with.
 
 ```bash
 npm install
