@@ -197,4 +197,5 @@ function main() {
 	poll();
 	setInterval(poll, period.asMilliseconds());
 }
-db.db.sync().then(() => main());
+db.db.sync({force: config.forcemigrate})
+	.then(() => main());
