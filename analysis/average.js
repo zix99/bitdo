@@ -2,6 +2,12 @@ const duration = require('../lib/duration');
 const moment = require('moment');
 const _ = require('lodash');
 
+/*
+The 'average' metric takes a single configuration of a type duration, the `period`.
+
+The metric will then average all available data in this past period and return the value.
+*/
+
 module.exports = function(market, context){
 	if (!this.period)
 		throw Error('Average metric needs period config');
