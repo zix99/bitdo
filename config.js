@@ -32,6 +32,9 @@ const config = require('yargs')
 	.boolean('noredirect')
 	.describe('forcemigrate', 'Recreate the database, deleting all historical data')
 	.boolean('forcemigrate')
+	.describe('log', 'Specify output filename for logs')
+	.default('log', 'bitdo.log')
+	.string('log')
 	.argv;
 
 if (fs.existsSync(config.conf)) {

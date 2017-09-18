@@ -9,9 +9,11 @@ const log = new (winston.Logger)({
   transports: [
     new MethodTransport(ui.log),
     new (winston.transports.File)({
-      filename: 'bitdo.log',
-      maxsize: 1024 * 128,
+      filename: config.log,
+      maxsize: 1024 * 1024 * 10,
       json: false,
+      tailable: true,
+      zippedArchive: true,
     }),
   ],
 });
