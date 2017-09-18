@@ -76,6 +76,19 @@ and also plugins installed globally with the name `bitdo-plugin-*`.
 The `web` plugin will bind to a port and expose information about your trading system via the port.  See the
 [readme for the web plugin](/plugins/web) for more information.
 
+### Database
+
+By default, *bitdo* uses a `sqlite3` database that it will create in the working directory.  This is a fine default,
+but if you find it doesn't scale or would like to use a different database.  It uses [Sequelize](http://docs.sequelizejs.com/manual/installation/getting-started.html#setting-up-a-connection),
+so any DB that it supports, will work fine.  Just change the database connection string in the configuration `db`, and
+make sure to install whatever driver sequelize requires to connect to that db.
+
+For example, if you wanted to use mysql:
+```bash
+npm install -g tedious //mysql driver
+bitdo --db "mysql://localhost/bitdo"
+```
+
 ### Running
 
 Once configuration is all set up, you can run simply by executing `bitdo`.
