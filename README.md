@@ -57,6 +57,13 @@ The `rules.json` file contains the core auto-trading rules of your program.
 
 TODO: Add documentation of rules file.
 
+Rules will automatically be reloaded if *bitdo* detects a change, without needing to restart *bitdo*.
+
+It is important to note that the rules file also maintains the state of the execution, so the application
+may overwrite it with an updated state from time to time.
+
+For now, you can see an [rules.example.json](rules.example.json)
+
 ### Plugins
 
 The plugins are also controlled via arguments or the `bitdo.conf` file.
