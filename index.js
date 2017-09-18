@@ -198,9 +198,9 @@ function saveRules() {
 }
 
 function evaluateRules() {
+	const previousState = _.cloneDeep(context.rules);
 	return actions.evaluateRuleSet(context)
 		.then(ret => {
-			const previousState = _.cloneDeep(context.rules);
 			ui.updateRules(context.rules.rules);
 			if (!_.isEqual(previousState, context.rules))
 				saveRules();
