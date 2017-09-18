@@ -179,6 +179,9 @@ module.exports = {
 	},
 
 	updateRules(rules) {
+		if (!rules)
+			return;
+
 		const rows = _.map(rules, rule => {
 			if (rule._ignore)
 				return null;

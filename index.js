@@ -13,7 +13,10 @@ const db = require('./db');
 const log = require('./log');
 
 const context = {
-	rules: {},
+	rules: {
+		period: '10m',
+		rules: {},
+	},
 	exchanges: [],
 	holdings: {},
 	markets: {},
@@ -25,16 +28,35 @@ let lastRulesDate = 0;
 
 // Load the rules
 function reloadRulesFile() {
-	log.info(`Loading rules file ${config.rules}...`);
-	try {
-		context.rules = JSON.parse(fs.readFileSync(config.rules, {encoding: 'utf8'}));
-		lastRulesDate = new Date();
-		log.info(`Rules successfully loaded`);
-	} catch(err) {
-		log.warn('Error loading rules file: ' + err);
+	if (fs.existsSync(config.rules)) {
+		log.info(`Loading rules file ${config.rules}...`);
+		try {
+			context.rules = JSON.parse(fs.readFileSync(config.rules, {encoding: 'utf8'}));
+			lastRulesDate = new Date();
+			log.info(`Rules successfully loaded`);
+		} catch(err) {
+			log.warn('Error loading rules file: ' + err);
+		}
+	} else {
+		log.info(`No rules file to load at ${config.rules}`);
 	}
 	ui.updateRules(context.rules.rules);
 }
+
+function watchRulesFile() {
+	if (fs.existsSync(config.rules)) {
+		fs.watch(config.rules, {persistent: false}, (event, thing) => {
+			if (event === 'change' && (new Date() - lastRulesDate) > 1000) { // Delay to not pick up a save
+				reloadRulesFile();
+				ui.updateRules(context.rules.rules);
+				evaluateRules();
+			}
+		});
+	} else {
+		log.warn(`Unable to watch rules file ${config.rules}, does not exist`);
+	}
+}
+
 reloadRulesFile();
 
 
@@ -236,15 +258,7 @@ function main() {
 	fastPoll();
 	setInterval(poll, period.asMilliseconds());
 	setInterval(fastPoll, 60 * 1000);
-
-	// Watch rules
-	fs.watch(config.rules, {persistent: false}, (event, thing) => {
-		if (event === 'change' && (new Date() - lastRulesDate) > 1000) { // Delay to not pick up a save
-			reloadRulesFile();
-			ui.updateRules(context.rules.rules);
-			evaluateRules();
-		}
-	});
+	watchRulesFile();
 }
 db.db.sync({force: config.forcemigrate})
 	.then(() => main());
