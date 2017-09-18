@@ -7,6 +7,11 @@ const Holdings = db.define('holdings', {
 	amount: Sequelize.DOUBLE,
 	amountBtc: Sequelize.DOUBLE,
 	amountUsd: Sequelize.DOUBLE,
+}, {
+	indexes: [
+		{fields: ['exchange', 'currency']},
+		{fields: ['createdAt']},
+	]
 });
 
 module.exports = Holdings;

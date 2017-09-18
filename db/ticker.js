@@ -6,6 +6,11 @@ const Tickers = db.define('tickers', {
 	currency: Sequelize.STRING,
 	relation: Sequelize.STRING,
 	price: Sequelize.DOUBLE,
+}, {
+	indexes: [
+		{fields: ['exchange', 'currency', 'relation']},
+		{fields: ['createdAt']}
+	]
 });
 
 module.exports = Tickers;
