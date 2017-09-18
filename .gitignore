@@ -3,7 +3,11 @@ rules.json
 .gdaxrc
 .bittrexrc
 db.sqlite
+db.sqlite-journal
 bitdo.conf
+
+# Just for now, will remove later
+package-lock.json
 
 # Logs
 logs

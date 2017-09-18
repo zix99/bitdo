@@ -246,4 +246,5 @@ function main() {
 		}
 	});
 }
-db.db.sync().then(() => main());
+db.db.sync({force: config.forcemigrate})
+	.then(() => main());

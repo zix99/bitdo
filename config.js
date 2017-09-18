@@ -30,6 +30,11 @@ const config = require('yargs')
 	.describe('v', 'Display debug text in log')
 	.describe('noredirect', 'Do not redirect stdout/stderr to UI')
 	.boolean('noredirect')
+	.describe('forcemigrate', 'Recreate the database, deleting all historical data')
+	.boolean('forcemigrate')
+	.describe('log', 'Specify output filename for logs')
+	.default('log', 'bitdo.log')
+	.string('log')
 	.argv;
 
 if (fs.existsSync(config.conf)) {
