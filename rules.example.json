@@ -9,8 +9,6 @@
 			"compareprice": "last",
 			"activate": "3%",
 			"amount": "100%",
-			"_state": "48.08",
-			"_symbol": "W"
 		},
 		{
 			"market": "GDAX:LTC-USD",
@@ -20,8 +18,6 @@
 			"compareprice": "last",
 			"activate": "3%",
 			"amount": "100%",
-			"_state": "98.08",
-			"_symbol": "W"
 		},
 		{
 			"market": "GDAX:LTC-USD",
@@ -36,9 +32,6 @@
 			},
 			"activate": "1%",
 			"amount": "100%",
-			"_state": "-0.09181818181818358",
-			"_symbol": "W",
-			"_orderId": "abcdef"
 		}
 	]
 }
