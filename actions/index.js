@@ -20,7 +20,6 @@ Rule specificiation:
 	description: "Something to help you remember",
 
 	// Internal
-	_state: "State to display in UI",
 	_symbol: "Symbol for state",
 	_ignore: "Ignore the statement",
 	_orderId: "123", // Id for order to keep track of it
@@ -115,8 +114,12 @@ const lib = {
 				const activatePrice = targetPrice - rule.activate * targetPrice * getDirectionality(rule.comparator);
 				const rollbackPrice = targetPrice - rule.rollback * targetPrice * getDirectionality(rule.comparator);
 
-				// UI:
-				rule._state = `${analyticsPrice} -> ${targetPrice} (${analyticsPrice-targetPrice}. A: ${activatePrice})`; //TODO: Formatting
+				rule._meta = {
+					activate: activatePrice,
+					rollback: rollbackPrice,
+					target: targetPrice,
+					analytics: analyticsPrice,
+				};
 
 				if (rule._orderId) {
 					// Order has already been created
@@ -124,6 +127,9 @@ const lib = {
 						log.info(`Rule regressed, deleting order...`);
 						delete rule._orderId;
 						rule._symbol = 'R'; // regressed
+					} else {
+						// Get order status (fulled or non-filled)
+						// if filled, process 'mode' (remove, decrement, etc)
 					}
 				} else if (compareVals(analyticsPrice, rule.comparator, activatePrice)) {
 					// Crossed the threshold for activation
