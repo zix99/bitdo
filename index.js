@@ -235,6 +235,7 @@ function poll() {
 	log.info('Polling...');
 	Promise.all([
 		updateHoldings(),
+		updateOrders(),
 	]).then(() => {
 		ui.render();
 		return evaluateRules();
@@ -243,21 +244,11 @@ function poll() {
 	});
 }
 
-function fastPoll() {
-	Promise.all([
-		updateOrders(),
-	]).then(() => {
-		ui.render();
-	});
-}
-
 function main() {
 	const period = duration.parse(context.rules.period || '10m');
 	log.info(`Polling every ${period.asMinutes()} minutes...`);
 	poll();
-	fastPoll();
 	setInterval(poll, period.asMilliseconds());
-	setInterval(fastPoll, 60 * 1000);
 	watchRulesFile();
 }
 db.db.sync({force: config.forcemigrate})
