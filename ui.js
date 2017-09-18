@@ -185,7 +185,7 @@ module.exports = {
 		const rows = _.map(rules, rule => {
 			if (rule._ignore)
 				return null;
-			return [rule._symbol || '?', rule.market, rule.action, rule.description || '', rule.triggerprice, rule.amount, rule._orderId || rule._state || ''];
+			return [rule._symbol || '?', rule.market, rule.action, rule.description || '', `${rule.comparator}${rule.triggerprice}`, rule.amount, rule._state || ''];
 		});
 		rows.unshift(['', 'Product', 'Action', 'Desc', 'Trigger', 'Amount', 'State']);
 		ruleTable.setData(_.filter(rows, x => x !== null));

@@ -12,7 +12,8 @@ Rule specificiation:
 	"triggerprice" : "100",		// RelPrice to trigger at
 	"compareprice" : "last",	// What to compare the price to (analytics name)
 	"comparator" : "<",			// How to compare target price and trigger price
-	"activate" : "3%",			// What threshold to "activate" at (send to the exchange)
+	"activate" : 0.03,			// What threshold to "activate" at (send to the exchange), percentage
+	"rollback" : 0.05,			// Value at which the order is canceled
 	"amount" : "100%"			// How much money, as relative to holdings, to execute with, relative to asking price
 
 	// Optional:
@@ -41,7 +42,8 @@ Returns: Modified rule, rejected=error
 const RULE_DEFAULTS = {
 	mode: 'remove',
 	compareprice: 'last',
-	activate: '3%',
+	activate: 0.03,
+	rollback: 0.05,
 	amount: '100%',
 };
 
@@ -81,12 +83,8 @@ function getRelativeNumber(val, comparison) {
 	return result;
 }
 
-function instantiateActionByName(name) {
-	return require(`./${name}`);
-}
-
-function compareVals(left, compartor, right) {
-	switch(compartor) {
+function compareVals(left, comparator, right) {
+	switch(comparator) {
 		case '<': return left < right;
 		case '<=': return left <= right;
 		case '>': return left > right;
@@ -94,6 +92,16 @@ function compareVals(left, compartor, right) {
 		case '=': return left === right;
 	}
 	return false;
+}
+
+function getDirectionality(comparator) {
+	switch(comparator) {
+		case '<': return -1;
+		case '<=': return -1;
+		case '>': return 1;
+		case '>=': return 1;
+	}
+	return 0;
 }
 
 const lib = {
@@ -104,18 +112,29 @@ const lib = {
 		return analysis.evaluateMetric(rule.compareprice, market, context)
 			.then(analyticsPrice => {
 				const targetPrice = getRelativeNumber(rule.triggerprice, analyticsPrice);
+				const activatePrice = targetPrice - rule.activate * targetPrice * getDirectionality(rule.comparator);
+				const rollbackPrice = targetPrice - rule.rollback * targetPrice * getDirectionality(rule.comparator);
 
-				rule._state = `${targetPrice - analyticsPrice}`;
-				rule._symbol = 'W';
+				// UI:
+				rule._state = `${analyticsPrice} -> ${targetPrice} (${analyticsPrice-targetPrice}. A: ${activatePrice})`; //TODO: Formatting
 
-				if (compareVals(analyticsPrice, rule.comparator, targetPrice)) {
-					rule._symbol = 'T';
-
-					const action = instantiateActionByName(rule.action);
-					return action(rule, context);
+				if (rule._orderId) {
+					// Order has already been created
+					if (compareVals(rollbackPrice, rule.comparator, analyticsPrice)) {
+						log.info(`Rule regressed, deleting order...`);
+						delete rule._orderId;
+						rule._symbol = 'R'; // regressed
+					}
+				} else if (compareVals(analyticsPrice, rule.comparator, activatePrice)) {
+					// Crossed the threshold for activation
+					log.info(`Rule crossed threshold, placing order...`);
+					rule._symbol = 'A'; // activated
+					rule._orderId = 'abc'; //TODO actually order...
 				} else {
-					return Promise.resolve(false);
+					rule._symbol = 'W'; // watching
 				}
+
+				return true;
 			});
 	},
 
