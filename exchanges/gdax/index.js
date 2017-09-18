@@ -48,6 +48,7 @@ function getStatusCode(status) {
 	switch (status) {
 		case 'done': return 'F';
 		case 'active': return 'O';
+		case 'open': return 'O';
 		case 'rejected': return 'X';
 	}
 	return '?';
