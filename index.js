@@ -5,6 +5,7 @@ const fs = require('fs');
 const _ = require('lodash');
 const Exchanges = require('./exchanges');
 const Plugins = require('./plugins');
+const actions = require('./actions');
 const PluginSet = require('./lib/pluginset');
 const ui = require('./ui');
 const duration = require('./lib/duration');
@@ -12,32 +13,55 @@ const db = require('./db');
 const log = require('./log');
 
 const context = {
-	rules: {},
+	rules: {
+		period: '10m',
+		rules: {},
+	},
 	exchanges: [],
+	holdings: {},
+	markets: {},
+	plugins: null,
 	db,
 };
 
+let lastRulesDate = 0;
+
 // Load the rules
 function reloadRulesFile() {
-	log.info(`Loading rules file ${config.rules}...`);
-	try {
-		context.rules = JSON.parse(fs.readFileSync(config.rules, {encoding: 'utf8'}));
-		log.info(`Rules successfully loaded`);
-	} catch(err) {
-		log.warn('Error loading rules file: ' + err);
+	if (fs.existsSync(config.rules)) {
+		log.info(`Loading rules file ${config.rules}...`);
+		try {
+			context.rules = JSON.parse(fs.readFileSync(config.rules, {encoding: 'utf8'}));
+			lastRulesDate = new Date();
+			log.info(`Rules successfully loaded`);
+		} catch(err) {
+			log.warn('Error loading rules file: ' + err);
+		}
+	} else {
+		log.info(`No rules file to load at ${config.rules}`);
 	}
 	ui.updateRules(context.rules.rules);
 }
-fs.watch(config.rules, {persistent: false}, (event) => {
-	if (event === 'change') {
-		reloadRulesFile();
+
+function watchRulesFile() {
+	if (fs.existsSync(config.rules)) {
+		fs.watch(config.rules, {persistent: false}, (event, thing) => {
+			if (event === 'change' && (new Date() - lastRulesDate) > 1000) { // Delay to not pick up a save
+				reloadRulesFile();
+				ui.updateRules(context.rules.rules);
+				evaluateRules();
+			}
+		});
+	} else {
+		log.warn(`Unable to watch rules file ${config.rules}, does not exist`);
 	}
-});
+}
+
 reloadRulesFile();
 
 
 // Initialize plugins
-const plugins = new PluginSet();
+const plugins = context.plugins = new PluginSet();
 _.each(config.plugin, pluginName => {
 	log.info(`Loading plugin '${pluginName}'...`);
 	plugins.push(Plugins.createPlugin(pluginName, context));
@@ -64,6 +88,7 @@ function getAllMarkets() {
 }
 
 function updateTicker() {
+	log.info(`Updating ticker data...`);
 	return getAllMarkets()
 		.map(market => {
 			log.debug(`Fetching ticker for ${market.exchange.name} ${market.currency}:${market.relation}...`);
@@ -72,24 +97,33 @@ function updateTicker() {
 					log.warn(`Error fetching ticker for ${market.exchange.name} on ${market.currency}:${market.relation}`);
 					return null;
 				});
-		}, {concurrency: 2});
-}
-
-function buildExchangeRateTable() {
-	const TARGETS = config.currencies;
-	return updateTicker()
-		.then(tickers => {
-			let data = {};
-			_.each(tickers, ticker => {
-				if (_.includes(TARGETS, ticker.relation)) {
-					data[`${ticker.currency}-${ticker.relation}`] = ticker.price;
-				}
+		}, {concurrency: 2})
+		.filter(x => x !== null)
+		.then(markets => {
+			_.each(markets, market => {
+				db.Tickers.create({
+					exchange: market.exchange.name,
+					currency: market.currency,
+					relation: market.relation,
+					price: market.price,
+				});
+				context.markets[market.id] = market;
 			});
-			return data;
+			return markets;
 		});
 }
 
-function getHoldings() {
+function buildExchangeRateTable(markets) {
+	let data = {};
+	_.each(markets, ticker => {
+		if (_.includes(config.currencies, ticker.relation)) {
+			data[`${ticker.currency}-${ticker.relation}`] = ticker.price;
+		}
+	});
+	return data;
+}
+
+function getAllHoldings() {
 	return Promise.map(context.exchanges, exchange => {
 		log.info(`Updating holdings for ${exchange.name}...`);
 		return exchange.getHoldings()
@@ -125,23 +159,25 @@ function getRateBetweenCurrencies(rateTable, from, to) {
 
 function updateHoldings() {
 	return Promise.all([
-		getHoldings(),
-		buildExchangeRateTable(),
-	]).spread((holdings, rates) => {
+		getAllHoldings(),
+		updateTicker(),
+	]).spread((holdings, markets) => {
+		const rates = buildExchangeRateTable(markets);
 		const sums = _.reduce(config.currencies, (o, i) => {
 			o[i] = 0;
 			return o;
 		}, {});
 		_.each(holdings, holding => {
-			holding.updatedAt = new Date();
 			holding.conversions = {};
 			holding.ticker = {};
 			_.each(config.currencies, pc => {
 				const toPcRate = getRateBetweenCurrencies(rates, holding.currency, pc);
 				holding.ticker[pc] = toPcRate;
 				sums[pc] += holding.conversions[pc] = holding.balance * toPcRate;
-			})
-			console.dir(holding);
+			});
+
+			context.holdings[`${holding.exchange.name}:${holding.currency}`] = holding;
+
 			ui.updateHolding(holding);
 			db.Holdings.create({
 				exchange: holding.exchange.name,
@@ -149,17 +185,19 @@ function updateHoldings() {
 				amount: holding.balance,
 				amountUsd: holding.conversions.USD,	//TODO: Ideally, this won't be hardcoded
 				amountBtc: holding.conversions.BTC,
-			})
+			});
 		});
 
 		_.each(sums, (val, currency) => {
 			db.Historicals.create({
 				currency,
 				amount: val,
-			})
+			});
+			plugins.event('onHoldingTotal', currency, val);
 		});
 
 		log.info('Update complete.');
+		plugins.event('onHoldingUpdated');
 	});
 }
 
@@ -168,20 +206,34 @@ function updateOrders() {
 	return Promise.map(context.exchanges, exchange => exchange.getOrders())
 		.then(_.flatten)
 		.then(orders => {
+			plugins.event('onOrderUpdated');
 			ui.updateOrders(orders);
 		}).catch(err => {
 			log.error(`Error updating orders: ${err.message}`);
 		});
 }
 
+function saveRules() {
+	log.info(`Save updated rules to ${config.rules}...`);
+	lastRulesDate = new Date();
+	fs.writeFileSync(config.rules, JSON.stringify(context.rules, null, '\t'));
+}
+
 function evaluateRules() {
-	return Promise.resolve();
+	const previousState = _.cloneDeep(context.rules);
+	return actions.evaluateRuleSet(context)
+		.then(ret => {
+			ui.updateRules(context.rules.rules);
+			if (!_.isEqual(previousState, context.rules))
+				saveRules();
+		}).catch(err => {
+			log.error(`Error evaluating ruleset: ${err}`);
+		})
 }
 
 function poll() {
 	log.info('Polling...');
 	Promise.all([
-		updateOrders(),
 		updateHoldings(),
 	]).then(() => {
 		ui.render();
@@ -191,11 +243,22 @@ function poll() {
 	});
 }
 
+function fastPoll() {
+	Promise.all([
+		updateOrders(),
+	]).then(() => {
+		ui.render();
+	});
+}
+
 function main() {
 	const period = duration.parse(context.rules.period);
 	log.info(`Polling every ${period.asMinutes()} minutes...`);
 	poll();
+	fastPoll();
 	setInterval(poll, period.asMilliseconds());
+	setInterval(fastPoll, 60 * 1000);
+	watchRulesFile();
 }
 db.db.sync({force: config.forcemigrate})
 	.then(() => main());

@@ -3,7 +3,7 @@ const memoize = require('memoizee');
 const fs = require('fs');
 
 function Exchange(name, impl) {
-	this.name = name;
+	this.name = name.toUpperCase();
 	this._impl = impl;
 
 	this.getMarkets = memoize(this.__getMarkets, {
@@ -23,7 +23,7 @@ Exchange.prototype.getTicker = function (currency, relation) {
 	}
 	*/
 	return this._impl.getTicker(currency, relation)
-		.then(ticker => _.assign({exchange: this, currency, relation}, ticker));
+		.then(ticker => _.assign({exchange: this, currency, relation, id: `${this.name}:${currency}-${relation}`}, ticker));
 };
 
 Exchange.prototype.getHoldings = function () {
@@ -39,7 +39,7 @@ Exchange.prototype.getHoldings = function () {
 	}]
 	*/
 	return this._impl.getHoldings()
-		.map(holding => _.assign({exchange: this}, holding));
+		.map(holding => _.assign({exchange: this, updatedAt: new Date()}, holding));
 }
 
 Exchange.prototype.getOrders = function() {

@@ -2,32 +2,36 @@
 	"period": "10m",
 	"rules": [
 		{
-			"action" : "buy-limit",
-			"mode" : "remove",
-			"triggerprice" : "100",
-			"compareprice" : "last",
-			"activate" : "3%",
-			"amount" : "100%"
+			"market": "GDAX:LTC-USD",
+			"action": "buy-limit",
+			"mode": "remove",
+			"triggerprice": "100",
+			"compareprice": "last",
+			"activate": "3%",
+			"amount": "100%",
 		},
 		{
-			"action" : "sell-limit",
-			"mode" : "decrement",
-			"triggerprice" : "150",
-			"compareprice" : "last",
-			"activate" : "3%",
-			"amount" : "100%"
+			"market": "GDAX:LTC-USD",
+			"action": "sell-limit",
+			"mode": "decrement",
+			"triggerprice": "150",
+			"compareprice": "last",
+			"activate": "3%",
+			"amount": "100%",
 		},
 		{
-			"description" : "Trailing stop -5% avg",
-			"action" : "sell-limit",
-			"mode" : "forever",
-			"triggerprice" : "-5%",
-			"compareprice" : {
-				"type" : "average",
-				"period" : "20m"
+			"market": "GDAX:LTC-USD",
+			"description": "Trail-stp",
+			"action": "sell-limit",
+			"mode": "forever",
+			"triggerprice": "52",
+			"comparator": "<=",
+			"compareprice": {
+				"metric": "average",
+				"period": "25m"
 			},
-			"activate" : "1%",
-			"amount" : "100%"
+			"activate": "1%",
+			"amount": "100%",
 		}
 	]
 }

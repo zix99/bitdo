@@ -1,18 +1,9 @@
 const blessed = require('blessed');
 const contrib = require('blessed-contrib');
 const _ = require('lodash');
-const numeral = require('numeral');
 const moment = require('moment');
 const config = require('./config');
-
-const NUMF = "0,0.0000";
-function formatNum(n) {
-	if (Math.abs(n) < 0.000000001)
-		return '0.0';
-	if (Math.abs(n) < 0.00001)
-		return '~0';
-	return numeral(n || 0).format(NUMF);
-}
+const format = require('./lib/format');
 
 const screen = blessed.Screen({
 	smartCSR: true
@@ -111,14 +102,14 @@ function updateHoldingsTable() {
 			moment(v.updatedAt).format('Do hA'),
 			v.exchange.name,
 			v.currency,
-			formatNum(v.ticker.USD),
-			formatNum(v.balance),
-			formatNum(v.conversions.BTC),
-			formatNum(v.conversions.USD)
+			format.number(v.ticker.USD),
+			format.number(v.balance),
+			format.number(v.conversions.BTC),
+			format.number(v.conversions.USD)
 		];
 	})
 	data.unshift([]);
-	data.unshift(['', 'Total', '', '', '', formatNum(sums.BTC), formatNum(sums.USD)]);
+	data.unshift(['', 'Total', '', '', '', format.number(sums.BTC), format.number(sums.USD)]);
 
 	holdingTable.setData({
 		headers: ['Updated', 'Exch', 'Sym', 'Last USD', 'Owned', 'BTC', 'USD'],
@@ -153,8 +144,8 @@ module.exports = {
 					order.product,
 					order.side,
 					order.type,
-					formatNum(order.size),
-					formatNum(order.price),
+					format.number(order.size),
+					format.number(order.price),
 					'N/A',
 				]
 			}),
@@ -167,9 +158,9 @@ module.exports = {
 					order.product,
 					order.side,
 					order.type,
-					formatNum(order.size),
-					formatNum(order.price),
-					formatNum(order.fee)
+					format.number(order.size),
+					format.number(order.price),
+					format.number(order.fee)
 				]
 			}),
 		]);
@@ -179,11 +170,23 @@ module.exports = {
 	},
 
 	updateRules(rules) {
+		if (!rules)
+			return;
+
 		const rows = _.map(rules, rule => {
-			return [rule.symbol || '?', rule.action, rule.triggerprice, rule.amount, rule._activated || false, rule._state || ''];
+			if (rule._ignore)
+				return null;
+			return [
+				rule._symbol || '?',
+				rule.market,
+				rule.action,
+				rule.comparator + format.short(_.get(rule, '_meta.target', rule.triggerprice)),
+				rule.amount,
+				format.short(_.get(rule, '_meta.analytics', 0)) + '->' + format.short(_.get(rule, '_meta.activate', 0)) + '/' + format.short(_.get(rule, '_meta.rollback', 0))
+			];
 		});
-		rows.unshift(['', 'Action', 'Trigger', 'Amount', 'Activated', 'State']);
-		ruleTable.setData(rows);
+		rows.unshift(['', 'Product', 'Action', 'Trigger', 'Amount', 'A/D']);
+		ruleTable.setData(_.filter(rows, x => x !== null));
 		screen.render();
 	}
 };
