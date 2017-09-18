@@ -9,6 +9,9 @@ automated trades at preset points.
 
 Make sure to use at least node 6.x. You can always find the version of node I'm using in the [.nvmrc](.nvmrc) file.
 
+If you get an error about installing/loading the exchanges or plugins, make sure you're running an up-to-date version of `npm`. You
+can update npm by running `npm update -g npm`.
+
 ```bash
 npm install -g bitdo
 ```
