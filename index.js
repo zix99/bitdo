@@ -252,7 +252,7 @@ function fastPoll() {
 }
 
 function main() {
-	const period = duration.parse(context.rules.period);
+	const period = duration.parse(context.rules.period || '10m');
 	log.info(`Polling every ${period.asMinutes()} minutes...`);
 	poll();
 	fastPoll();
