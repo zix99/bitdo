@@ -45,14 +45,11 @@ const RULE_DEFAULTS = {
 	amount: '100%',
 };
 
-
-// Wrap the rule with a set of convenient helpers that can be used by the executor
-function ruleWrapInterface(rule) {
-	return _.assign(rule, {
-		ignore() {
-			this._ignore = true;
-			return this;
-		}
+// Hydrate rule with defaults, if they don't exist
+function hydrateWithDefaults(rule) {
+	_.each(RULE_DEFAULTS, (val, key) => {
+		if (!_.has(rule, key))
+			rule[key] = val;
 	});
 }
 
@@ -102,6 +99,7 @@ function compareVals(left, compartor, right) {
 const lib = {
 	evaluateAction(rule, market, context) {
 		log.info(`Evaluating rule ${rule.description || rule.action}`);
+		hydrateWithDefaults(rule);
 
 		return analysis.evaluateMetric(rule.compareprice, market, context)
 			.then(analyticsPrice => {
