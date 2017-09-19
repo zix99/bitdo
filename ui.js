@@ -27,9 +27,9 @@ screen.append(holdingTable);
 
 const ruleTable = blessed.ListTable({
 	width: '40%',
-	height: '50%',
+	height: '50%-1',
 	left: '60%',
-	top: '0',
+	top: 1,
 	border: {
 		type: 'line',
 	},
@@ -41,6 +41,22 @@ const ruleTable = blessed.ListTable({
 	},
 });
 screen.append(ruleTable);
+
+const header = blessed.Text({
+	top: 0,
+	left: '60%+1',
+	width: '40%-2',
+	height: 1,
+	content: 'BitDo',
+});
+screen.append(header);
+
+const clock = blessed.Text({
+	left: '100%-14',
+	width: 14,
+	height: 1,
+});
+screen.append(clock);
 
 const orderTable = blessed.ListTable({
 	width: '60%',
@@ -158,6 +174,11 @@ function updateHoldingsTable() {
 }
 updateHoldingsTable();
 
+setInterval(function(){
+	clock.content = chalk.cyan(moment().format('LTS'));
+	screen.render();
+}, 2000);
+
 module.exports = {
 	bindKey(key, action) {
 		screen.key(key, action);
@@ -169,6 +190,11 @@ module.exports = {
 	},
 
 	render() {
+		screen.render();
+	},
+
+	setHeader(text) {
+		header.content = `${chalk.bold.green('BitDo')}: ${text}`;
 		screen.render();
 	},
 

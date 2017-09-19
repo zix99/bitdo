@@ -3,6 +3,8 @@ const config = require('./config');
 const Promise = require('bluebird');
 const fs = require('fs');
 const _ = require('lodash');
+const chalk = require('chalk');
+const moment = require('moment');
 const Exchanges = require('./exchanges');
 const Plugins = require('./plugins');
 const actions = require('./actions');
@@ -240,6 +242,7 @@ function poll() {
 	isPolling = true;
 
 	log.info('Polling...');
+	ui.setHeader(chalk.bold.bgRed.white('Updating...'));
 	Promise.all([
 		updateHoldings(),
 		updateOrders(),
@@ -250,6 +253,9 @@ function poll() {
 		log.error(err.message);
 	}).finally(() => {
 		isPolling = false;
+		const last = moment().format('LTS');
+		const next = moment().add(duration.parse(context.rules.period || '10m')).format('LTS');
+		ui.setHeader(`Last: ${chalk.blue(last)}  Next: ${chalk.red(next)}`);
 	});
 }
 
