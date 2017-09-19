@@ -177,7 +177,7 @@ updateHoldingsTable();
 setInterval(function(){
 	clock.content = chalk.cyan(moment().format('LTS'));
 	screen.render();
-}, 2000);
+}, 1000);
 
 module.exports = {
 	bindKey(key, action) {
