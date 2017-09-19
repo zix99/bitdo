@@ -1,6 +1,7 @@
 const _ = require('lodash');
 const Promise = require('bluebird');
 const log = require('../log');
+const config = require('../config');
 const analysis = require('../analysis');
 
 /**
@@ -105,6 +106,9 @@ function getDirectionality(comparator) {
 
 const lib = {
 	evaluateAction(rule, market, context) {
+		if (rule._ignore)
+			return Promise.resolve(false);
+
 		log.info(`Evaluating rule ${rule.description || rule.action}`);
 		hydrateWithDefaults(rule);
 
@@ -128,14 +132,45 @@ const lib = {
 						delete rule._orderId;
 						rule._symbol = 'R'; // regressed
 					} else {
-						// Get order status (fulled or non-filled)
-						// if filled, process 'mode' (remove, decrement, etc)
+						let filled = false;
+						if (rule._simulated) {
+							if (compareVals(analyticsPrice, rule.comparator, targetPrice)) {
+								// Filled!
+								log.info(`ORDER EXECUTED: ${JSON.stringify(rule)}`);
+								filled = true;
+							}
+						} else {
+							// Get order status (fulled or non-filled)
+							// if filled, process 'mode' (remove, decrement, etc)
+						}
+
+
+						if (filled) {
+							rule._symbol = 'F';
+
+							const mode = rule.mode || 'once';
+							switch(mode) {
+								case 'forever':
+									delete rule._orderId;
+									delete rule._simulated;
+									break;
+								case 'once':
+								default:
+									rule._ignore = true;
+									break;
+							}
+						}
 					}
 				} else if (compareVals(analyticsPrice, rule.comparator, activatePrice)) {
 					// Crossed the threshold for activation
 					log.info(`Rule crossed threshold, placing order...`);
 					rule._symbol = 'A'; // activated
-					rule._orderId = 'abc'; //TODO actually order...
+					if (config.simulate) {
+						rule._orderId = 'SIM';
+						rule._simulated = true;
+					} else {
+						rule._orderId = 'abc'; //TODO actually order...
+					}
 				} else {
 					rule._symbol = 'W'; // watching
 				}

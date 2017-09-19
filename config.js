@@ -35,6 +35,8 @@ const config = require('yargs')
 	.describe('log', 'Specify output filename for logs')
 	.default('log', 'bitdo.log')
 	.string('log')
+	.describe('simulate', 'Never execute a real order, only pretend to in the logs')
+	.boolean('simulate')
 	.argv;
 
 if (fs.existsSync(config.conf)) {
