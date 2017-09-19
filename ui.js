@@ -24,7 +24,6 @@ const holdingTable = contrib.table({
 	fg: 'white',
 });
 screen.append(holdingTable);
-holdingTable.focus();
 
 const ruleTable = blessed.ListTable({
 	width: '40%',
@@ -61,7 +60,7 @@ screen.append(orderTable);
 
 const log = blessed.Log({
 	width: '40%',
-	height: '50%',
+	height: '50%-2',
 	left: '60%',
 	top: '50%',
 	border: {
@@ -77,7 +76,30 @@ const log = blessed.Log({
 	label: 'Log Messages'
 });
 screen.append(log);
-log.focus();
+
+const command = blessed.Textbox({
+	width: '40%',
+	height: 3,
+	top: '100%-3',
+	left: '60%',
+	border: {
+		type: 'line',
+	},
+	keys: true,
+})
+screen.append(command);
+command.focus();
+command.on('submit', (text) => {
+	if (text) {
+		console.log('Command interface not fully implemented');
+	}
+	command.clearValue();
+	screen.render();
+});
+command.on('cancel', () => {
+	command.clearValue();
+	screen.render();
+})
 
 screen.key(['C-c'], function(ch, key) {
   return process.exit(0);
@@ -89,7 +111,15 @@ screen.key(['j'], function() {
 screen.key(['k'], function() {
 	log.scroll(10);
 });
-
+screen.key('h', function(){
+	console.log([
+		'Help:',
+		'h       See this message again',
+		'j/k     Navigate log messages',
+		'enter   Enable command interface',
+		'F5      Refresh holdings, run rules',
+	].join('\n'));
+});
 screen.render();
 
 function directionalColor(val) {

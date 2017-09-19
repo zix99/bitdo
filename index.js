@@ -261,6 +261,7 @@ function main() {
 	watchRulesFile();
 
 	ui.bindKey(['f5', 'r'], poll);
+	console.log('Press \'h\' to see help');
 }
 db.db.sync({force: config.forcemigrate})
 	.then(() => main());
