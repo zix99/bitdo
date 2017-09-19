@@ -92,7 +92,13 @@ screen.key(['k'], function() {
 
 screen.render();
 
-
+function directionalColor(val) {
+	if (val > 0.0)
+		return chalk.greenBright;
+	if (val < 0.0)
+		return chalk.redBright;
+	return chalk.yellow;
+}
 
 const holdingData = {};
 function updateHoldingsTable() {
@@ -109,7 +115,7 @@ function updateHoldingsTable() {
 			format.number(v.hold),
 			format.number(v.conversions.BTC),
 			chalk.blue(format.number(v.conversions.USD)),
-			chalk.greenBright(0),
+			directionalColor(v.delta)(format.number(v.delta)),
 		];
 	})
 	data.unshift([]);
@@ -123,6 +129,10 @@ function updateHoldingsTable() {
 updateHoldingsTable();
 
 module.exports = {
+	bindKey(key, action) {
+		screen.key(key, action);
+	},
+
 	log(s) {
 		log.log(s);
 		screen.render();
@@ -133,7 +143,9 @@ module.exports = {
 	},
 
 	updateHolding(holding) {
+		let lastUSD = _.get(holdingData, `${holding.id}.ticker.USD`, holding.ticker.USD || 0);
 		holdingData[holding.id] = holding;
+		holdingData[holding.id].delta = holding.ticker.USD - lastUSD;
 		updateHoldingsTable();
 		screen.render();
 	},

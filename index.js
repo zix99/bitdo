@@ -231,7 +231,14 @@ function evaluateRules() {
 		})
 }
 
+let isPolling = false;
 function poll() {
+	if (isPolling) {
+		log.warn('Already polling, wont poll again');
+		return;
+	}
+	isPolling = true;
+
 	log.info('Polling...');
 	Promise.all([
 		updateHoldings(),
@@ -241,6 +248,8 @@ function poll() {
 		return evaluateRules();
 	}).catch(err => {
 		log.error(err.message);
+	}).finally(() => {
+		isPolling = false;
 	});
 }
 
@@ -250,6 +259,8 @@ function main() {
 	poll();
 	setInterval(poll, period.asMilliseconds());
 	watchRulesFile();
+
+	ui.bindKey(['f5', 'r'], poll);
 }
 db.db.sync({force: config.forcemigrate})
 	.then(() => main());
