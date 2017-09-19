@@ -4,6 +4,7 @@ const _ = require('lodash');
 const moment = require('moment');
 const config = require('./config');
 const format = require('./lib/format');
+const chalk = require('chalk');
 
 const screen = blessed.Screen({
 	smartCSR: true
@@ -15,11 +16,12 @@ const holdingTable = contrib.table({
 	height: '50%',
 	interactive: true,
 	label: 'Holdings',
-	columnWidth: [10,8,4, 12, 12, 12, 12],
+	columnWidth: [10,8,4, 12, 12, 12, 12, 12, 8],
 	columnSpacing: 4,
 	border: {
 		type: 'line',
 	},
+	fg: 'white',
 });
 screen.append(holdingTable);
 holdingTable.focus();
@@ -102,17 +104,19 @@ function updateHoldingsTable() {
 			moment(v.updatedAt).format('Do hA'),
 			v.exchange.name,
 			v.currency,
-			format.number(v.ticker.USD),
-			format.number(v.balance),
+			chalk.yellow(format.number(v.ticker.USD)),
+			chalk.bold.blueBright(format.number(v.balance)),
+			format.number(v.hold),
 			format.number(v.conversions.BTC),
-			format.number(v.conversions.USD)
+			chalk.blue(format.number(v.conversions.USD)),
+			chalk.greenBright(0),
 		];
 	})
 	data.unshift([]);
-	data.unshift(['', 'Total', '', '', '', format.number(sums.BTC), format.number(sums.USD)]);
+	data.unshift(['', 'Total', '', '', '', '', format.number(sums.BTC), format.number(sums.USD)]);
 
 	holdingTable.setData({
-		headers: ['Updated', 'Exch', 'Sym', 'Last USD', 'Owned', 'BTC', 'USD'],
+		headers: ['Updated', 'Exch', 'Sym', 'Last USD', 'Owned', 'Hold', 'BTC', 'USD', 'Delta'],
 		data,
 	});
 }
