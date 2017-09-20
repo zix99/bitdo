@@ -106,7 +106,6 @@ const command = blessed.Textbox({
 	inputOnFocus: true,
 })
 screen.append(command);
-command.focus();
 let evalContext = {};
 command.on('submit', (text) => {
 	command.clearValue();
