@@ -240,6 +240,7 @@ function poll() {
 		return;
 	}
 	isPolling = true;
+	const nextRunTime = moment().add(duration.parse(context.rules.period || '10m')).format('LTS');
 
 	log.info('Polling...');
 	ui.setHeader(chalk.bold.bgRed.white('Updating...'));
@@ -254,8 +255,7 @@ function poll() {
 	}).finally(() => {
 		isPolling = false;
 		const last = moment().format('LTS');
-		const next = moment().add(duration.parse(context.rules.period || '10m')).format('LTS');
-		ui.setHeader(`Last: ${chalk.blue(last)}  Next: ${chalk.red(next)}`);
+		ui.setHeader(`Last: ${chalk.blue(last)}  Next: ${chalk.red(nextRunTime)}`);
 	});
 }
 
