@@ -266,6 +266,7 @@ function main() {
 	setInterval(poll, period.asMilliseconds());
 	watchRulesFile();
 
+	ui.setEvalContext(context);
 	ui.bindKey(['f5', 'r'], poll);
 	console.log('Press \'h\' to see help');
 }

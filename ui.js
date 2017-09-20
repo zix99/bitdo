@@ -4,6 +4,7 @@ const _ = require('lodash');
 const moment = require('moment');
 const config = require('./config');
 const format = require('./lib/format');
+const repl = require('./lib/repl');
 const chalk = require('chalk');
 
 const screen = blessed.Screen({
@@ -102,20 +103,26 @@ const command = blessed.Textbox({
 		type: 'line',
 	},
 	keys: true,
+	inputOnFocus: true,
 })
 screen.append(command);
 command.focus();
+let evalContext = {};
 command.on('submit', (text) => {
-	if (text) {
-		console.log('Command interface not fully implemented');
-	}
 	command.clearValue();
+	if (text) {
+		repl.evaluate(evalContext, text);
+		command.focus();
+	}
 	screen.render();
 });
 command.on('cancel', () => {
 	command.clearValue();
 	screen.render();
 })
+screen.key(['enter'], () => {
+	command.focus();
+});
 
 screen.key(['C-c'], function(ch, key) {
   return process.exit(0);
@@ -196,6 +203,10 @@ module.exports = {
 	setHeader(text) {
 		header.content = `${chalk.bold.green('BitDo')}: ${text}`;
 		screen.render();
+	},
+
+	setEvalContext(c) {
+		evalContext = c;
 	},
 
 	updateHolding(holding) {
