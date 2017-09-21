@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const fs = require('fs');
+const dataloader = require('./lib/dataloader');
 
 const config = require('yargs')
 	.usage('Usage: $0 [options]')
@@ -40,7 +41,7 @@ const config = require('yargs')
 	.argv;
 
 if (fs.existsSync(config.conf)) {
-	_.assign(config, JSON.parse(fs.readFileSync(config.conf)));
+	_.assign(config, dataloader.load(config.conf));
 }
 
 config.primary = config.currencies[0] || 'USD';
