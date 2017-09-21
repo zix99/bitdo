@@ -26,12 +26,18 @@ Let's start first by setting up your exchanges.
 
 This configuration file can be used in place of cli arguments. It is JSON, and holds anything
 you don't want to type each time.  bitdo will look for `bitdo.conf` in the current directory.
+Configuration files can be either json or yaml.
 
 Example:
 ```json
 {
 	"exchange" : ["gdax"]
 }
+```
+OR
+```yaml
+exchange:
+ - gdax
 ```
 
 #### Exchanges
