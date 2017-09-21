@@ -1,5 +1,7 @@
 # BitDo
 
+> NOTE: BitDo is still under development, and can't execute rules quite yet.  It can display and track your holding history to a local database.  Please wait a little bit longer until it can execute rules.
+
 A cryptocurrency automated trader (not an intelligent trader!).
 
 The intention of this is to provide a configurable platform for performing
