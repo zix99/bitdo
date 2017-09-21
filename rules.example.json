@@ -7,8 +7,9 @@
 			"mode": "remove",
 			"triggerprice": "100",
 			"compareprice": "last",
+			"comparator" : "<",
 			"activate": "3%",
-			"amount": "100%",
+			"amount": "100%"
 		},
 		{
 			"market": "GDAX:LTC-USD",
@@ -16,8 +17,9 @@
 			"mode": "decrement",
 			"triggerprice": "150",
 			"compareprice": "last",
+			"comparator": ">",
 			"activate": "3%",
-			"amount": "100%",
+			"amount": "100%"
 		},
 		{
 			"market": "GDAX:LTC-USD",
@@ -31,7 +33,7 @@
 				"period": "25m"
 			},
 			"activate": "1%",
-			"amount": "100%",
+			"amount": "100%"
 		}
 	]
 }
