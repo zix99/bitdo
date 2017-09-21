@@ -13,6 +13,7 @@ const ui = require('./ui');
 const duration = require('./lib/duration');
 const db = require('./db');
 const log = require('./log');
+const dataloader = require('./lib/dataloader');
 
 const context = {
 	rules: {
@@ -33,7 +34,7 @@ function reloadRulesFile() {
 	if (fs.existsSync(config.rules)) {
 		log.info(`Loading rules file ${config.rules}...`);
 		try {
-			context.rules = JSON.parse(fs.readFileSync(config.rules, {encoding: 'utf8'}));
+			context.rules = dataloader.load(config.rules);
 			lastRulesDate = new Date();
 			log.info(`Rules successfully loaded`);
 		} catch(err) {
@@ -218,7 +219,7 @@ function updateOrders() {
 function saveRules() {
 	log.info(`Save updated rules to ${config.rules}...`);
 	lastRulesDate = new Date();
-	fs.writeFileSync(config.rules, JSON.stringify(context.rules, null, '\t'));
+	dataloader.save(config.rules, context.rules);
 }
 
 function evaluateRules() {
