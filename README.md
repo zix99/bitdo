@@ -1,3 +1,7 @@
+# NOTICE: DEPRECATED
+
+BitDo has been deprecated in favor of [BitDo2](https://github.com/zix99/bitdo2), a complete overhaul of the code of BitDo.
+
 # BitDo
 
 > NOTE: BitDo is still under development, and can't execute rules quite yet.  It can display and track your holding history to a local database.  Please wait a little bit longer until it can execute rules.
